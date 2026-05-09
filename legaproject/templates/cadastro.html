@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - LEGA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            margin: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007BFF;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #218838;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Criar Conta</h2>
+        <form id="cadastroForm">
+            <!-- Token de segurança do Django (CSRF) -->
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="username">Nome de Usuário</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="data_de_nascimento">Data de Nascimento</label>
+                <input type="date" id="data_de_nascimento" name="data_de_nascimento" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="escola_ou_faculdade">Escola ou Faculdade (Opcional)</label>
+                <input type="text" id="escola_ou_faculdade" name="escola_ou_faculdade">
+            </div>
+
+            <div class="form-group">
+                <label for="area_de_atuacao">Área de Atuação (Opcional)</label>
+                <input type="text" id="area_de_atuacao" name="area_de_atuacao">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn">Cadastrar</button>
+            <div id="errorMessage" class="error-message"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('cadastroForm').addEventListener('submit', async function (event) {
+            // Evita o comportamento padrão do POST do HTML
+            event.preventDefault();
+
+            const form = event.target;
+            const errorMessageDiv = document.getElementById('errorMessage');
+            errorMessageDiv.textContent = ''; // Limpa mensagens anteriores
+
+            // Extraindo o CSRF Token
+            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            // Montando o payload JSON com os dados originais e os novos
+            const data = {
+                username: form.username.value,
+                email: form.email.value,
+                password: form.password.value,
+                data_de_nascimento: form.data_de_nascimento.value,
+                telefone: form.telefone.value,
+                // Campos opcionais
+                escola_ou_faculdade: form.escola_ou_faculdade.value,
+                area_de_atuacao: form.area_de_atuacao.value
+            };
+
+            try {
+                // Fetch para a API com a rota solicitada
+                const response = await fetch("/api/auth/cadastro", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.status === 200 || response.status === 201) {
+                    // Redireciona para o login
+                    window.location.href = '/api/auth/login';
+                } else {
+                    // Tratamento de Erros de Validação da API
+                    const errorData = await response.json();
+                    let errorMessages = [];
+                    for (const key in errorData) {
+                        if (errorData.hasOwnProperty(key)) {
+                            errorMessages.push(`Erro no campo ${key}: ${errorData[key]}`);
+                        }
+                    }
+                    errorMessageDiv.innerHTML = errorMessages.join('<br>');
+                }
+            } catch (error) {
+                console.error("Erro na requisição:", error);
+                errorMessageDiv.textContent = "Ocorreu um erro ao conectar com o servidor. Tente novamente.";
+            }
+        });
+    </script>
+</body>
+
+</html>
