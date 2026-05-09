@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - LEGA</title>
+    <title>Login - LEGA</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -23,7 +23,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 450px;
+            max-width: 400px;
             margin: 20px;
         }
 
@@ -54,7 +54,7 @@
         .btn {
             width: 100%;
             padding: 10px;
-            background-color: #28a745;
+            background-color: #007BFF;
             color: white;
             border: none;
             border-radius: 4px;
@@ -65,7 +65,7 @@
         }
 
         .btn:hover {
-            background-color: #218838;
+            background-color: #0056b3;
         }
 
         .error-message {
@@ -78,91 +78,76 @@
             border-radius: 4px;
             display: none;
         }
+
+        .footer-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .footer-link a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="container">
-        <h2>Criar Conta</h2>
-        <form id="cadastroForm">
+        <h2>Entrar</h2>
+        <form id="loginForm">
             <!-- Token de segurança do Django (CSRF) -->
             {% csrf_token %}
 
             <div class="form-group">
-                <label for="nome_completo">Nome Completo</label>
-                <input type="text" id="nome_completo" name="nome_completo" required
-                    placeholder="Digite seu nome completo">
+                <label for="usuario">Usuário ou E-mail</label>
+                <input type="text" id="usuario" name="usuario" required placeholder="Digite seu apelido ou e-mail">
             </div>
 
             <div class="form-group">
-                <label for="usuario">Apelido / Nickname (Usuário)</label>
-                <input type="text" id="usuario" name="usuario" required placeholder="Como prefere ser chamado?">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required placeholder="Digite sua senha">
             </div>
 
-            <div class="form-group">
-                <label for="email">E-mail</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-
-            <div class="form-group">
-                <label for="dt_nasc">Data de Nascimento</label>
-                <input type="date" id="dt_nasc" name="dt_nasc" required>
-            </div>
-
-            <div class="form-group">
-                <label for="telefone">Telefone</label>
-                <input type="tel" id="telefone" name="telefone" required placeholder="Ex: (11) 99999-9999">
-            </div>
-
-            <div class="form-group">
-                <label for="instituicao">Escola ou Faculdade (Opcional)</label>
-                <input type="text" id="instituicao" name="instituicao">
-            </div>
-
-            <div class="form-group">
-                <label for="area_atuacao">Área de Atuação (Opcional)</label>
-                <input type="text" id="area_atuacao" name="area_atuacao">
-            </div>
-
-            <div class="form-group">
-                <label for="senha">Senha</label>
-                <input type="password" id="senha" name="senha" required>
-            </div>
-
-            <button type="submit" class="btn">Cadastrar</button>
+            <button type="submit" class="btn">Entrar</button>
             <div id="errorMessage" class="error-message"></div>
         </form>
+
+        <div class="footer-link">
+            Não tem uma conta? <a href="/cadastro/">Cadastre-se</a>
+        </div>
     </div>
 
     <script>
-        document.getElementById('cadastroForm').addEventListener('submit', async function (event) {
+        document.getElementById('loginForm').addEventListener('submit', async function (event) {
             // Evita o comportamento padrão do POST do HTML
             event.preventDefault();
 
             const form = event.target;
             const errorMessageDiv = document.getElementById('errorMessage');
-            errorMessageDiv.style.display = 'none'; // Esconde o erro antes de tentar
+            errorMessageDiv.style.display = 'none'; // Esconde a box antes de tentar
             errorMessageDiv.innerHTML = ''; // Limpa mensagens anteriores
 
             // Extraindo o CSRF Token
             const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
 
-            // Montando o payload JSON com os dados completos e com os nomes em português
+            // O TokenObtainPairView do SimpleJWT espera os campos configurados no USERNAME_FIELD da Model.
+            // O nosso USERNAME_FIELD na model é 'usuario' e o campo da senha no python é 'password'.
             const data = {
-                nome_completo: form.nome_completo.value,
                 usuario: form.usuario.value,
-                email: form.email.value,
-                senha: form.senha.value,
-                dt_nasc: form.dt_nasc.value,
-                telefone: form.telefone.value,
-                instituicao: form.instituicao.value,
-                area_atuacao: form.area_atuacao.value
+                password: form.password.value
             };
 
             try {
-                // Fetch para a API
-                const response = await fetch("/api/auth/cadastro", {
+                // Fetch para a API oficial de Login
+                const response = await fetch("/api/auth/login", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -171,27 +156,30 @@
                     body: JSON.stringify(data)
                 });
 
-                if (response.status === 200 || response.status === 201) {
-                    // Redireciona para o login em caso de sucesso
-                    window.location.href = '/api/auth/login'; // Ou a rota correta de frontend se existir /auth/login/
+                if (response.status === 200) {
+                    // Login bem-sucedido: Captura os tokens JWT
+                    const responseData = await response.json();
+
+                    // Salva os tokens no localStorage para uso em rotas protegidas (ex: /api/usuarios/perfil)
+                    localStorage.setItem('access_token', responseData.access);
+                    localStorage.setItem('refresh_token', responseData.refresh);
+
+                    // Redireciona para o perfil/dashboard
+                    window.location.href = '/perfil/';
+                } else if (response.status === 401) {
+                    // Erro de credenciais inválidas (Padrão do DRF SimpleJWT)
+                    errorMessageDiv.innerHTML = "<strong>Erro:</strong> Usuário ou senha incorretos.";
+                    errorMessageDiv.style.display = 'block';
                 } else {
-                    // Tratamento de Erros de Validação da API
+                    // Tratamento de outros Erros de Validação da API
                     const errorData = await response.json();
                     let errorMessages = [];
-
-                    // Tratamento customizado para campos únicos usando as novas chaves
-                    if (errorData.usuario) errorMessages.push(`<strong>Usuário:</strong> Este apelido já está em uso.`);
-                    if (errorData.email) errorMessages.push(`<strong>E-mail:</strong> Este e-mail já está cadastrado.`);
-                    if (errorData.telefone) errorMessages.push(`<strong>Telefone:</strong> Este telefone já está cadastrado.`);
-
-                    // Adiciona os outros erros que podem vir
                     for (const key in errorData) {
-                        if (errorData.hasOwnProperty(key) && !['usuario', 'email', 'telefone'].includes(key)) {
+                        if (errorData.hasOwnProperty(key)) {
                             errorMessages.push(`<strong>${key}:</strong> ${errorData[key]}`);
                         }
                     }
-
-                    errorMessageDiv.innerHTML = errorMessages.join('<br>');
+                    errorMessageDiv.innerHTML = errorMessages.length > 0 ? errorMessages.join('<br>') : "Usuário ou senha incorretos.";
                     errorMessageDiv.style.display = 'block'; // Mostra a div de erro
                 }
             } catch (error) {

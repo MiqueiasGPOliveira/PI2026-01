@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - LEGA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #007BFF;
+        }
+
+        .profile-info {
+            margin-bottom: 25px;
+        }
+
+        .info-group {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-group:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            width: 40%;
+        }
+
+        .info-value {
+            color: #111;
+            width: 60%;
+            text-align: right;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 12px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #c82333;
+        }
+
+        .btn-mentor {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            width: calc(100% - 50px);
+            box-sizing: border-box;
+        }
+
+        .btn-mentor:hover {
+            background-color: #218838;
+        }
+
+        .loading-message {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Meu Perfil</h2>
+        
+        <div id="loading" class="loading-message">
+            Carregando seus dados...
+        </div>
+
+        <div id="profileContent" class="profile-info" style="display: none;">
+            <div class="info-group">
+                <span class="info-label">Nome Completo:</span>
+                <span class="info-value" id="perfil-nome_completo"></span>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label">Apelido (Usuário):</span>
+                <span class="info-value" id="perfil-usuario"></span>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label">E-mail:</span>
+                <span class="info-value" id="perfil-email"></span>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label">Data de Nascimento:</span>
+                <span class="info-value" id="perfil-dt_nasc"></span>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label">Telefone:</span>
+                <span class="info-value" id="perfil-telefone"></span>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label">Instituição:</span>
+                <span class="info-value" id="perfil-instituicao"></span>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label">Área de Atuação:</span>
+                <span class="info-value" id="perfil-area_atuacao"></span>
+            </div>
+        </div>
+
+        <div style="margin-top: 25px; margin-bottom: 15px; text-align: center;">
+            <a href="{% url 'roadmap_page' %}" class="btn-mentor" style="display: none;" id="btnMentor">Gerar Roadmap de Estudos</a>
+        </div>
+
+        <button id="btnLogout" class="btn-logout" style="display: none;">Sair da Conta</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Verifica se o token existe no localStorage
+            const accessToken = localStorage.getItem('access_token');
+            
+            if (!accessToken) {
+                // Se não houver token, o usuário não está logado. Redireciona para o login.
+                window.location.href = '/login/';
+                return;
+            }
+
+            try {
+                // Faz a requisição GET para buscar os dados do perfil, enviando o Token de Autenticação JWT no Header
+                const response = await fetch('/api/usuarios/perfil', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`, // Enviando o JWT
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 200) {
+                    const data = await response.json();
+                    
+                    // Oculta a mensagem de carregamento e mostra o conteúdo do perfil e os botões
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('profileContent').style.display = 'block';
+                    document.getElementById('btnMentor').style.display = 'inline-block';
+                    document.getElementById('btnLogout').style.display = 'block';
+
+                    // Injeta os dados nos elementos HTML pelos IDs (mapeando exatamente as chaves JSON que configuramos)
+                    document.getElementById('perfil-nome_completo').textContent = data.nome_completo;
+                    document.getElementById('perfil-usuario').textContent = data.usuario;
+                    document.getElementById('perfil-email').textContent = data.email;
+                    document.getElementById('perfil-telefone').textContent = data.telefone;
+                    
+                    // Tratamento para exibir apenas a data (sem a hora) no padrão DD/MM/AAAA
+                    let dataNascimento = data.dt_nasc;
+                    if (dataNascimento && dataNascimento.includes(' ')) {
+                        // Pega apenas a parte "AAAA-MM-DD" antes do espaço "00:00:00"
+                        let dataParte = dataNascimento.split(' ')[0];
+                        // Converte para DD/MM/AAAA
+                        let [ano, mes, dia] = dataParte.split('-');
+                        dataNascimento = `${dia}/${mes}/${ano}`;
+                    }
+                    document.getElementById('perfil-dt_nasc').textContent = dataNascimento;
+
+                    // Tratamento de campos opcionais
+                    document.getElementById('perfil-instituicao').textContent = data.instituicao ? data.instituicao : 'Não informado';
+                    document.getElementById('perfil-area_atuacao').textContent = data.area_atuacao ? data.area_atuacao : 'Não informado';
+
+                } else if (response.status === 401 || response.status === 403) {
+                    // Token expirado ou inválido (Acesso Negado)
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    window.location.href = '/login/';
+                } else {
+                    document.getElementById('loading').textContent = 'Erro ao carregar dados do perfil.';
+                }
+            } catch (error) {
+                console.error("Erro de conexão:", error);
+                document.getElementById('loading').textContent = 'Falha de comunicação com o servidor.';
+            }
+        });
+
+        // Lógica de Logout
+        document.getElementById('btnLogout').addEventListener('click', function() {
+            // Remove os tokens do localStorage para encerrar a sessão no front-end
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            
+            // Redireciona para o login
+            window.location.href = '/login/';
+        });
+    </script>
+</body>
+
+</html>

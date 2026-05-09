@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Roadmap Socrático - LEGA</title>
+    
+    <!-- Biblioteca Marked.js via CDN para renderizar Markdown de forma segura e limpa -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            margin: 0;
+            color: #007BFF;
+            font-size: 22px;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            color: #555;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #f0f0f0;
+        }
+
+        /* Formulário */
+        .form-area {
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-generate:hover {
+            background-color: #218838;
+        }
+
+        .btn-generate:disabled {
+            background-color: #94d3a2;
+            cursor: not-allowed;
+        }
+
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            color: #007BFF;
+            font-style: italic;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        /* Área de Resultado Markdown */
+        .result-area {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow-y: auto;
+            max-height: 50vh;
+        }
+        
+        .result-area h1, .result-area h2, .result-area h3 {
+            color: #0056b3;
+            margin-top: 20px;
+        }
+        
+        .result-area ul, .result-area ol {
+            padding-left: 20px;
+        }
+        
+        .result-area code {
+            background-color: #e9ecef;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2>Gerador de Roadmap Educacional</h2>
+            <a href="{% url 'perfil_page' %}" class="btn-back">← Voltar</a>
+        </div>
+
+        <div class="form-area" id="formArea">
+            <p style="color: #666; margin-bottom: 20px;">
+                Preencha os detalhes abaixo e nosso Mentor AI (Gemini) criará uma trilha de estudos personalizada unindo suas informações do perfil com seu objetivo atual.
+            </p>
+
+            <form id="roadmapForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="assunto">O que você quer aprender? (Assunto)</label>
+                    <input type="text" id="assunto" required placeholder="Ex: Programação Python, Filosofia, Matemática...">
+                </div>
+
+                <div class="form-group">
+                    <label for="objetivo">Qual seu objetivo com isso?</label>
+                    <input type="text" id="objetivo" required placeholder="Ex: Conseguir o primeiro emprego, Passar no vestibular...">
+                </div>
+
+                <div class="form-group">
+                    <label for="tempo_pretendido">Qual o prazo pretendido?</label>
+                    <input type="text" id="tempo_pretendido" required placeholder="Ex: 6 meses, 1 ano, 3 semanas...">
+                </div>
+
+                <div class="form-group">
+                    <label for="horas_diarias">Quantas horas por dia pode estudar?</label>
+                    <input type="text" id="horas_diarias" required placeholder="Ex: 2 horas, 30 minutos...">
+                </div>
+
+                <div class="form-group">
+                    <label for="nivel">Seu nível atual no assunto:</label>
+                    <select id="nivel" required>
+                        <option value="">Selecione...</option>
+                        <option value="Iniciante do zero">Iniciante do zero</option>
+                        <option value="Básico (Já sei alguma coisa)">Básico</option>
+                        <option value="Intermediário">Intermediário</option>
+                        <option value="Avançado">Avançado</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="formato">Formato preferido de consumo:</label>
+                    <select id="formato" required>
+                        <option value="">Selecione...</option>
+                        <option value="Videoaulas e Prática">Videoaulas e Prática</option>
+                        <option value="Apenas Leitura (Livros e Artigos)">Apenas Leitura</option>
+                        <option value="Projetos Práticos (Mão na massa)">Projetos Práticos</option>
+                        <option value="Misto (Vídeos, Textos e Exercícios)">Misto</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-generate" id="btnGenerate">Gerar meu Roadmap Socrático</button>
+            </form>
+
+            <div class="loading-indicator" id="loadingIndicator">
+                Analisando seu perfil e montando a trilha perfeita... Aguarde.
+            </div>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <!-- O Markdown parseado pelo marked.js vai aparecer aqui -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Verifica a autenticação antes de qualquer coisa
+            const accessToken = localStorage.getItem('access_token');
+            if (!accessToken) {
+                window.location.href = '/login/';
+                return;
+            }
+
+            const roadmapForm = document.getElementById('roadmapForm');
+            const btnGenerate = document.getElementById('btnGenerate');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultArea = document.getElementById('resultArea');
+
+            roadmapForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                // 1. Extração dos dados do form
+                const payload = {
+                    assunto: document.getElementById('assunto').value,
+                    objetivo: document.getElementById('objetivo').value,
+                    tempo_pretendido: document.getElementById('tempo_pretendido').value,
+                    horas_diarias: document.getElementById('horas_diarias').value,
+                    nivel: document.getElementById('nivel').value,
+                    formato: document.getElementById('formato').value
+                };
+
+                // Oculta área de resultado antiga, trava form e mostra loading
+                resultArea.style.display = 'none';
+                btnGenerate.disabled = true;
+                loadingIndicator.style.display = 'block';
+
+                const csrfToken = roadmapForm.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                try {
+                    // 2. Dispara o fetch POST para a API
+                    // A API no backend se encarregará de buscar os dados sensíveis do usuário na sessão
+                    const response = await fetch('/api/mentor/interagir', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken,
+                            'Authorization': `Bearer ${accessToken}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 200) {
+                        const data = await response.json();
+                        
+                        // 3. Usa a biblioteca 'marked' para renderizar o Markdown em HTML
+                        // O backend já configurou o prompt para a IA devolver Markdown limpo
+                        resultArea.innerHTML = marked.parse(data.response);
+                        
+                        // Exibe a área de resultado rolável
+                        resultArea.style.display = 'block';
+                        
+                    } else if (response.status === 401 || response.status === 403) {
+                        alert('Sua sessão expirou. Faça login novamente.');
+                        localStorage.clear();
+                        window.location.href = '/login/';
+                    } else {
+                        const errData = await response.json();
+                        alert(`Erro da API: ${errData.error || 'Falha ao processar.'}`);
+                    }
+                } catch (error) {
+                    console.error('Erro na geração do roadmap:', error);
+                    alert('Erro de conexão com o servidor. Tente novamente mais tarde.');
+                } finally {
+                    btnGenerate.disabled = false;
+                    loadingIndicator.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

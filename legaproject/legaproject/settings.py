@@ -10,22 +10,31 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+from datetime import timedelta
+
+# Carrega as variáveis de ambiente do arquivo .env
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4a5-ero)^kmn)xr(xfzi#@ez1z!kf10+f%+-15w@^f1d5)jpw*'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-replace-in-env')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS config
+allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = allowed_hosts_env.split(',') if allowed_hosts_env else []
+if DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['*'] # Fallback for local development
 
 
 # Application definition
@@ -107,9 +116,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
@@ -122,27 +131,36 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # ==================================
-# MENTOR API SETTINGS
+# API & SECURITY SETTINGS
 # ==================================
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+# CORS Config
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+    cors_allowed = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+    CORS_ALLOWED_ORIGINS = cors_allowed.split(',') if cors_allowed else []
 
-CORS_ALLOW_ALL_ORIGINS = True
-
+# REST Framework Config
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DATETIME_FORMAT': '%Y-%m-%d %H:%M:%S',
+    'DATE_FORMAT': '%Y-%m-%d 00:00:00',
 }
 
-from datetime import timedelta
+# JWT Config
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTH_HEADER_TYPES': ('Bearer',),
+    'UPDATE_LAST_LOGIN': True,
 }
 
+# Custom User Model
 AUTH_USER_MODEL = 'api.User'
+
+# Gemini API Key
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')

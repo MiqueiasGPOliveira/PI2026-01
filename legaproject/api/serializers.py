@@ -7,36 +7,50 @@ class UserSerializer(serializers.ModelSerializer):
     """ Serializer de Saída: Retorna informações do usuário autenticado """
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'data_de_nascimento', 'telefone', 'escola_ou_faculdade', 'area_de_atuacao', 'date_joined']
+        fields = ['id', 'usuario', 'nome_completo', 'email', 'telefone', 'dt_nasc', 'instituicao', 'area_atuacao', 'dt_cadastro']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    """ Serializer de Entrada: Lida com a criação segura de contas com criptografia e os novos campos """
-    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    """ Serializer de Entrada: Lida com a criação segura de contas com os novos campos e validações """
+    
+    # Recebemos 'senha' no payload, mas o model do Django espera 'password' no set_password.
+    # Usamos o 'source' para dizer ao DRF que o campo 'senha' no JSON alimenta o atributo 'password' da classe
+    senha = serializers.CharField(source='password', write_only=True, required=True, style={'input_type': 'password'})
+    
+    usuario = serializers.CharField(required=True, max_length=150)
+    nome_completo = serializers.CharField(required=True, max_length=255)
     email = serializers.EmailField(required=True)
-    data_de_nascimento = serializers.DateField(required=True)
+    dt_nasc = serializers.DateField(required=True)
     telefone = serializers.CharField(required=True, max_length=20)
-    escola_ou_faculdade = serializers.CharField(required=False, allow_blank=True, max_length=255)
-    area_de_atuacao = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    instituicao = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    area_atuacao = serializers.CharField(required=False, allow_blank=True, max_length=255)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'data_de_nascimento', 'telefone', 'escola_ou_faculdade', 'area_de_atuacao']
+        # Listamos 'senha' em vez de 'password' para que a API espere e valide a chave 'senha' no JSON
+        fields = ['usuario', 'nome_completo', 'email', 'senha', 'dt_nasc', 'telefone', 'instituicao', 'area_atuacao']
+        # O DRF valida a unicidade automaticamente com base no model (unique=True em usuario, email e telefone)
 
     def create(self, validated_data):
-        # Utiliza o gerenciador da model 'create_user' para hash da senha
+        # Utiliza o gerenciador customizado 'create_user' para hash da senha
         user = User.objects.create_user(
-            username=validated_data['username'],
+            usuario=validated_data['usuario'],
             email=validated_data['email'],
-            password=validated_data['password'],
-            data_de_nascimento=validated_data.get('data_de_nascimento'),
+            password=validated_data['password'],  # O source='password' fez o DRF mapear 'senha' para 'password'
+            nome_completo=validated_data['nome_completo'],
+            dt_nasc=validated_data.get('dt_nasc'),
             telefone=validated_data.get('telefone'),
-            escola_ou_faculdade=validated_data.get('escola_ou_faculdade', ''),
-            area_de_atuacao=validated_data.get('area_de_atuacao', '')
+            instituicao=validated_data.get('instituicao', ''),
+            area_atuacao=validated_data.get('area_atuacao', '')
         )
         return user
 
 
 class MentorInteractSerializer(serializers.Serializer):
-    """ Serializer de Entrada: Valida o formato JSON recebido do aluno para interação """
-    prompt = serializers.CharField(required=True, min_length=1, help_text="A dúvida ou instrução do aluno.")
+    """ Serializer de Entrada: Valida o formato JSON recebido do formulário de Roadmap """
+    assunto = serializers.CharField(required=True)
+    tempo_pretendido = serializers.CharField(required=True)
+    objetivo = serializers.CharField(required=True)
+    nivel = serializers.CharField(required=True)
+    horas_diarias = serializers.CharField(required=True)
+    formato = serializers.CharField(required=True)

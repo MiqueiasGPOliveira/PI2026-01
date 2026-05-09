@@ -21,6 +21,9 @@ from . import views
 urlpatterns = [
     path('', views.landing_page, name='landing_page'),
     path('cadastro/', views.cadastro_page, name='cadastro_page'),
+    path('login/', views.login_page, name='login_page'),
+    path('perfil/', views.perfil_page, name='perfil_page'),
+    path('gerador-roadmap/', views.roadmap_page, name='roadmap_page'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
 ]

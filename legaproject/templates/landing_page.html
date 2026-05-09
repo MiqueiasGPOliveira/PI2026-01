@@ -48,8 +48,11 @@
         <h1>Bem-vindo ao LEGA</h1>
         <p>Desenvolva seu pensamento com a nossa Inteligência Artificial Socrática.</p>
 
-        <!-- O botão aponta dinamicamente para a rota nomeada da sua API existente -->
-        <a href="{% url 'cadastro_page' %}" class="btn">Cadastro</a>
+        <!-- Botões de ação para rotas de autenticação do front-end -->
+        <div style="margin-top: 20px;">
+            <a href="{% url 'login_page' %}" class="btn" style="margin-right: 10px;">Entrar</a>
+            <a href="{% url 'cadastro_page' %}" class="btn" style="background-color: #28a745;">Criar Conta</a>
+        </div>
     </div>
 
 </body>
