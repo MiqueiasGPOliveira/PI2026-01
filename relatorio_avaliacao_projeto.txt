@@ -1,0 +1,50 @@
+==========================================================
+RELATÓRIO DE AVALIAÇÃO DO PROJETO LEGA (DJANGO REST FRAMEWORK)
+==========================================================
+
+1. VISÃO GERAL
+O projeto encontra-se em um excelente estado de inicialização. É um back-end construído com Django 6.0 e Django Rest Framework (DRF), com o objetivo de fornecer uma API para uma plataforma de mentoria automatizada usando Inteligência Artificial (Google Gemini). A arquitetura atual respeita o padrão Model-View-Controller (MVC) do Django, com a adição correta de uma camada de 'Services' para centralizar lógicas complexas de negócios que não pertencem às Views.
+
+2. ARQUITETURA E CONFIGURAÇÕES (settings.py)
+- Banco de Dados: SQLite3 (Padrão do Django), ideal para a fase de MVP/Desenvolvimento.
+- Segurança e CORS: O pacote `corsheaders` está instalado e configurado liberando conexões de todas as origens (`CORS_ALLOW_ALL_ORIGINS = True`).
+- Gerenciamento de Variáveis de Ambiente: `python-dotenv` sendo utilizado corretamente para carregar a API Key do Gemini (GEMINI_API_KEY).
+- Autenticação: Utilizando o padrão JWT (JSON Web Token) por meio da biblioteca `rest_framework_simplejwt`. Tokens de acesso configurados para durarem 1 dia e tokens de atualização (refresh) por 7 dias, o que fornece um bom balanço prático em ambiente de estudo/teste.
+
+3. MODELAGEM DE DADOS (api/models.py)
+- O arquivo de models atual está completamente limpo/vazio.
+- Até o momento, a aplicação está se apoiando exclusivamente na Model padrão nativa do Django (`django.contrib.auth.models.User`) para realizar a gestão das contas dos alunos.
+- Próximo Passo Sugerido: Caso o sistema vá armazenar o histórico de conversas entre o aluno e o mentor, será necessário criar models como `ChatSession` e `ChatMessage` no futuro.
+
+4. SERIALIZERS (api/serializers.py)
+Boas práticas foram aplicadas aqui separando claramente o fluxo de entrada e saída.
+- UserSerializer: Mapeamento de saída (read-only) com os campos seguros do usuário.
+- RegisterSerializer: Mapeamento de entrada bem configurado, sobrescrevendo a função `create` utilizando `create_user` para que as senhas sejam devidamente "cacheadas" (hashed) de forma segura.
+- MentorInteractSerializer: Mapeamento simples validando que o 'prompt' existe e possui no mínimo 1 caractere antes de chamar o servidor.
+
+5. VIEWS E ROTAS (api/views.py e api/urls.py)
+Endpoints RESTful bem definidos:
+- [POST] /api/auth/cadastro: Público (AllowAny) para criar a conta de usuário.
+- [POST] /api/auth/login: Geração dos Tokens de autenticação.
+- [POST] /api/auth/refresh: Atualização dos Tokens.
+- [GET] /api/usuarios/perfil: Protegido (IsAuthenticated) para capturar as informações do usuário contido no Token JWT.
+- [POST] /api/mentor/interagir: Protegido (IsAuthenticated), delegando o trabalho pesado à service e retornando a resposta da I.A.
+
+6. SERVIÇOS (api/services.py)
+Uma das melhores partes da arquitetura. A classe `SocraticMentorService` implementa muito bem o S.O.L.I.D isolando as chamadas do Google Gemini.
+- O System Prompt foi muito bem escrito ("tutor socrático"), forçando a IA a não entregar a resposta de bandeja, e sim ajudar no raciocínio.
+- Tratamento de exceção na inicialização da IA está presente (fallback caso esteja sem a API KEY).
+- Sugestão: Atualmente a IA é "stateless", ou seja, ela recebe a pergunta do aluno, gera a resposta baseada no prompt socrático, mas não recorda as perguntas anteriores porque o SDK oficial nesse formato e sem chat history esquece o histórico.
+
+7. PONTOS FORTES ATUAIS:
+- Camada de 'Services' dedicada;
+- Código limpo e autodocumentado com docstrings nas classes;
+- Autenticação robusta (JWT);
+
+8. OPORTUNIDADES DE MELHORIA / PRÓXIMOS PASSOS:
+- Histórico de Conversas: Conforme citado, a IA não sabe qual foi a "dúvida anterior" do aluno. Seria interessante persistir isso no banco (`models.py`) e enviar o histórico nas mensagens para a API do Gemini.
+- Validação Unificadas: Adicionar validações extras para que 2 alunos não casdastrem o mesmo email na RegisterSerializer.
+- Versionamento com Git e Requirements.txt. Seu ambiente parece muito limpo, garantir de exportar as libs usando (pip freeze > requirements.txt).
+
+CONCLUSÃO:
+O projeto reflete ótimas práticas de engenharia de software para APIs com Django e possui fundações excelentes para que os recursos de inteligência artificial de tutoria possam crescer.

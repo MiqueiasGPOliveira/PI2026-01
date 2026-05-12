@@ -1,0 +1,38 @@
+==========================================================
+RESUMO DO PROJETO LEGA (ATUALIZADO)
+==========================================================
+
+Até o momento, o projeto LEGA (um back-end para plataforma de mentoria automatizada usando IA) foi reiniciado e estruturado com uma base sólida usando Django e Django Rest Framework (DRF). 
+
+Aqui está o resumo do que já foi implementado:
+
+1. ESTRUTURA BASE E CONFIGURAÇÕES
+- Projeto limpo e recriado do zero.
+- Configuração do banco de dados SQLite3 para a fase de desenvolvimento.
+- Implementação de variáveis de ambiente usando `python-dotenv` para proteger a chave da API do Google Gemini (GEMINI_API_KEY).
+- Liberação de CORS (`corsheaders`) para permitir conexões do front-end.
+
+2. AUTENTICAÇÃO E SEGURANÇA
+- Implementação de autenticação baseada em tokens JWT (`rest_framework_simplejwt`).
+- Criação de endpoints de autenticação seguros:
+  * Cadastro de novos usuários com hash de senha seguro.
+  * Login para geração de Access e Refresh tokens.
+  * Refresh para renovação de tokens expirados.
+
+3. ROTAS E VIEWS (API RESTful)
+- `POST /api/auth/cadastro/`: Para criar conta de aluno.
+- `POST /api/auth/login/`: Para entrar na plataforma.
+- `POST /api/auth/refresh/`: Para atualizar a sessão.
+- `GET /api/usuarios/perfil/`: Rota protegida para buscar os dados do usuário autenticado.
+- `POST /api/mentor/interagir/`: Rota protegida onde o usuário envia sua dúvida para a IA.
+
+4. INTEGRAÇÃO COM INTELIGÊNCIA ARTIFICIAL (GEMINI)
+- Criação de uma camada de "Services" (`api/services.py`) para isolar a regra de negócio da IA.
+- Desenvolvimento do `SocraticMentorService`, que conecta com a API do Google Gemini.
+- Configuração de um "System Prompt" (Prompt de Sistema) focado no método Socrático: a IA atua como um tutor que não dá a resposta de forma direta, mas faz perguntas e dá dicas para guiar o aluno ao raciocínio lógico.
+
+5. PRÓXIMOS PASSOS (O QUE FALTA)
+- Modelagem de Dados: Criar as tabelas no banco de dados (`models.py`) para salvar o histórico do chat (sessões e mensagens).
+- Memória da IA: Atualmente a IA não tem "memória" das mensagens passadas (stateless). Precisamos conectar o histórico salvo no banco para enviar o contexto completo nas próximas interações.
+
+O projeto está com um código limpo, muito bem estruturado e pronto para a expansão das funcionalidades de histórico!
