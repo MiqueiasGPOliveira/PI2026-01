@@ -6,22 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Mentor</title>
     <style>
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f4f4f9;
-            color: #333;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: #f8fafc;
         }
 
+        
         .container {
-            background: #fff;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             width: 100%;
             max-width: 400px;
             margin: 20px;
@@ -29,71 +34,101 @@
 
         h2 {
             text-align: center;
-            margin-bottom: 20px;
-            color: #007BFF;
+            margin-bottom: 30px;
+            color: #38bdf8; 
+            font-size: 2rem;
+            letter-spacing: -0.025em;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #94a3b8;
         }
 
         .form-group input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
             box-sizing: border-box;
         }
 
+        .form-group input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        
         .btn {
             width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
+            padding: 12px;
+            background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
         }
 
         .btn:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
         }
 
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        
         .error-message {
-            color: #dc3545;
+            color: #f87171;
             margin-top: 15px;
             text-align: center;
-            font-size: 0.9em;
-            background-color: #f8d7da;
-            padding: 10px;
-            border-radius: 4px;
+            font-size: 0.875rem;
+            background-color: rgba(127, 29, 29, 0.2);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            padding: 12px;
+            border-radius: 8px;
             display: none;
         }
 
         .footer-link {
             display: block;
             text-align: center;
-            margin-top: 15px;
-            font-size: 0.9em;
-            color: #666;
+            margin-top: 25px;
+            font-size: 0.875rem;
+            color: #94a3b8;
         }
 
         .footer-link a {
-            color: #007BFF;
+            color: #38bdf8;
             text-decoration: none;
+            font-weight: 600;
         }
 
         .footer-link a:hover {
             text-decoration: underline;
+        }
+
+        
+        ::placeholder {
+            color: #475569;
         }
     </style>
 </head>
@@ -103,50 +138,44 @@
     <div class="container">
         <h2>Entrar</h2>
         <form id="loginForm">
-            <!-- Token de segurança do Django (CSRF) -->
             {% csrf_token %}
 
             <div class="form-group">
                 <label for="usuario">Usuário ou E-mail</label>
-                <input type="text" id="usuario" name="usuario" required placeholder="Digite seu apelido ou e-mail">
+                <input type="text" id="usuario" name="usuario" required placeholder="Seu apelido ou e-mail">
             </div>
 
             <div class="form-group">
                 <label for="password">Senha</label>
-                <input type="password" id="password" name="password" required placeholder="Digite sua senha">
+                <input type="password" id="password" name="password" required placeholder="sua senha secreta">
             </div>
 
-            <button type="submit" class="btn">Entrar</button>
+            <button type="submit" class="btn">Acessar Plataforma</button>
             <div id="errorMessage" class="error-message"></div>
         </form>
 
         <div class="footer-link">
-            Não tem uma conta? <a href="/cadastro/">Cadastre-se</a>
+            Novo por aqui? <a href="/cadastro/">Crie sua conta</a>
         </div>
     </div>
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function (event) {
-            // Evita o comportamento padrão do POST do HTML
             event.preventDefault();
 
             const form = event.target;
             const errorMessageDiv = document.getElementById('errorMessage');
-            errorMessageDiv.style.display = 'none'; // Esconde a box antes de tentar
-            errorMessageDiv.innerHTML = ''; // Limpa mensagens anteriores
+            errorMessageDiv.style.display = 'none';
+            errorMessageDiv.innerHTML = '';
 
-            // Extraindo o CSRF Token
             const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
 
-            // O TokenObtainPairView do SimpleJWT espera os campos configurados no USERNAME_FIELD da Model.
-            // O nosso USERNAME_FIELD na model é 'usuario' e o campo da senha no python é 'password'.
             const data = {
                 usuario: form.usuario.value,
                 password: form.password.value
             };
 
             try {
-                // Fetch para a API oficial de Login
                 const response = await fetch("/api/auth/login", {
                     method: 'POST',
                     headers: {
@@ -157,34 +186,16 @@
                 });
 
                 if (response.status === 200) {
-                    // Login bem-sucedido: Captura os tokens JWT
                     const responseData = await response.json();
-
-                    // Salva os tokens no localStorage para uso em rotas protegidas (ex: /api/usuarios/perfil)
                     localStorage.setItem('access_token', responseData.access);
                     localStorage.setItem('refresh_token', responseData.refresh);
-
-                    // Redireciona para o perfil/dashboard
                     window.location.href = '/perfil/';
-                } else if (response.status === 401) {
-                    // Erro de credenciais inválidas (Padrão do DRF SimpleJWT)
-                    errorMessageDiv.innerHTML = "<strong>Erro:</strong> Usuário ou senha incorretos.";
-                    errorMessageDiv.style.display = 'block';
                 } else {
-                    // Tratamento de outros Erros de Validação da API
-                    const errorData = await response.json();
-                    let errorMessages = [];
-                    for (const key in errorData) {
-                        if (errorData.hasOwnProperty(key)) {
-                            errorMessages.push(`<strong>${key}:</strong> ${errorData[key]}`);
-                        }
-                    }
-                    errorMessageDiv.innerHTML = errorMessages.length > 0 ? errorMessages.join('<br>') : "Usuário ou senha incorretos.";
-                    errorMessageDiv.style.display = 'block'; // Mostra a div de erro
+                    errorMessageDiv.innerHTML = "<strong>Acesso negado:</strong> Credenciais inválidas.";
+                    errorMessageDiv.style.display = 'block';
                 }
             } catch (error) {
-                console.error("Erro na requisição:", error);
-                errorMessageDiv.innerHTML = "Ocorreu um erro inesperado ao conectar com o servidor. Verifique sua conexão e tente novamente.";
+                errorMessageDiv.innerHTML = "Falha na conexão com a IA Mentor.";
                 errorMessageDiv.style.display = 'block';
             }
         });
