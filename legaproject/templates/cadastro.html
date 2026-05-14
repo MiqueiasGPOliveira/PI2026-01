@@ -8,7 +8,6 @@
     <style>
         :root {
             --primary: #6366f1;
-            /* Indigo moderno */
             --primary-hover: #4f46e5;
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             --card-bg: rgba(255, 255, 255, 0.05);
@@ -193,7 +192,7 @@
 
                 if (response.status === 200 || response.status === 201) {
                     // Redireciona para o login em caso de sucesso
-                    window.location.href = '/login/'; // Adicionada a barra para evitar 301
+                    window.location.href = '/login'; // Adicionada a barra para evitar 301
                 } else {
                     // Tratamento de Erros de Validação da API
                     const errorData = await response.json();
