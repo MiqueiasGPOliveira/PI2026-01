@@ -164,3 +164,9 @@ AUTH_USER_MODEL = 'api.User'
 
 # Gemini API Key
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+
+# Custom Authentication Backend
+AUTHENTICATION_BACKENDS = [
+    'api.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
