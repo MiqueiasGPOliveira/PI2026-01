@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mentor{% endblock %}</title>
+    <!-- Importação da Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --bg-card: rgba(30, 41, 59, 0.6);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER CLASSES */
+        .main-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: transparent;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .header-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text-main);
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .header-link:hover {
+            color: var(--text-main);
+        }
+
+        .user-menu-container {
+            position: relative;
+        }
+
+        .avatar-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-main);
+            padding: 0;
+        }
+
+        .avatar-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            min-width: 180px;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .footer-text {
+            text-align: center;
+            padding: 30px;
+            font-size: 0.9rem;
+            color: rgba(148, 163, 184, 0.6);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: #0f172a;
+        }
+
+        /* Base content spacer to avoid overlap with absolute header */
+        .base-content {
+            margin-top: 80px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Custom Global Modal */
+        .global-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .global-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .global-modal-box {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .global-modal-overlay.show .global-modal-box {
+            transform: translateY(0);
+        }
+
+        .global-modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .global-modal-message {
+            font-size: 1rem;
+            color: #94a3b8;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            white-space: pre-wrap;
+        }
+
+        .global-modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .global-modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .global-modal-btn-cancel {
+            background: rgba(148, 163, 184, 0.1);
+            color: #f8fafc;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .global-modal-btn-cancel:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .global-modal-btn-confirm {
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.3);
+        }
+
+        .global-modal-btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-left">
+            <a href="{% url 'landing_page' %}" class="header-logo">MentorAI</a>
+            <a href="{% url 'sobre_page' %}" class="header-link">Sobre</a>
+            <a href="{% url 'roadmaps_page' %}" class="header-link hidden" id="nav-trilhas">Trilhas</a>
+        </div>
+        <div class="header-right">
+            <div class="user-menu-container">
+                <button id="avatar-btn" class="avatar-btn" aria-label="Menu do Usuário">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
+                <div id="user-dropdown" class="dropdown-menu">
+                    <div id="dropdown-logged-out" class="hidden">
+                        <a href="{% url 'login_page' %}" class="dropdown-item">Entre</a>
+                        <a href="{% url 'cadastro_page' %}" class="dropdown-item">Cadastre-se</a>
+                    </div>
+                    <div id="dropdown-logged-in" class="hidden">
+                        <a href="{% url 'perfil_page' %}" class="dropdown-item">Perfil</a>
+                        <a href="#" class="dropdown-item">Configurações</a>
+                        <a href="#" id="logout-btn" class="dropdown-item">Sair</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="base-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer-text">
+        Transformando curiosidade em conhecimento.
+    </footer>
+
+    <!-- Global Modal Overlay -->
+    <div id="globalModalOverlay" class="global-modal-overlay">
+        <div class="global-modal-box">
+            <h3 id="globalModalTitle" class="global-modal-title">Aviso</h3>
+            <div id="globalModalMessage" class="global-modal-message">Mensagem</div>
+            <div class="global-modal-actions">
+                <button id="globalModalBtnCancel" class="global-modal-btn global-modal-btn-cancel hidden">Cancelar</button>
+                <button id="globalModalBtnConfirm" class="global-modal-btn global-modal-btn-confirm">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Modal API
+        window.showModalAlert = function(message, title = "Aviso") {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('globalModalOverlay');
+                document.getElementById('globalModalTitle').textContent = title;
+                document.getElementById('globalModalMessage').textContent = message;
+                
+                const btnCancel = document.getElementById('globalModalBtnCancel');
+                const btnConfirm = document.getElementById('globalModalBtnConfirm');
+                
+                btnCancel.classList.add('hidden'); // alert doesn't have cancel
+                btnConfirm.textContent = 'OK';
+                
+                btnConfirm.onclick = () => {
+                    overlay.classList.remove('show');
+                    resolve(true);
+                };
+                
+                overlay.classList.add('show');
+            });
+        };
+
+        window.showModalConfirm = function(message, title = "Confirmação") {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('globalModalOverlay');
+                document.getElementById('globalModalTitle').textContent = title;
+                document.getElementById('globalModalMessage').textContent = message;
+                
+                const btnCancel = document.getElementById('globalModalBtnCancel');
+                const btnConfirm = document.getElementById('globalModalBtnConfirm');
+                
+                btnCancel.classList.remove('hidden');
+                btnCancel.textContent = 'Cancelar';
+                btnConfirm.textContent = 'Confirmar';
+                
+                btnCancel.onclick = () => {
+                    overlay.classList.remove('show');
+                    resolve(false);
+                };
+                
+                btnConfirm.onclick = () => {
+                    overlay.classList.remove('show');
+                    resolve(true);
+                };
+                
+                overlay.classList.add('show');
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const avatarBtn = document.getElementById('avatar-btn');
+            const dropdownMenu = document.getElementById('user-dropdown');
+            const loggedOutMenu = document.getElementById('dropdown-logged-out');
+            const loggedInMenu = document.getElementById('dropdown-logged-in');
+            const logoutBtn = document.getElementById('logout-btn');
+            const navTrilhas = document.getElementById('nav-trilhas');
+
+            // Verificar o estado de autenticação (JWT) via localStorage
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                if (loggedInMenu) loggedInMenu.classList.remove('hidden');
+                if (navTrilhas) navTrilhas.classList.remove('hidden');
+            } else {
+                if (loggedOutMenu) loggedOutMenu.classList.remove('hidden');
+            }
+
+            // Alternar menu dropdown
+            if (avatarBtn) {
+                avatarBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (dropdownMenu) dropdownMenu.classList.toggle('show');
+                });
+            }
+
+            // Fechar menu ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (dropdownMenu && avatarBtn && !dropdownMenu.contains(e.target) && !avatarBtn.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+
+            // Lógica de logout
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    // Caso o usuário tente deslogar numa página protegida, redirecionar para login
+                    window.location.href = '/login/';
+                });
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

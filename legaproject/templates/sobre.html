@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Sobre - Mentor{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Layout */
+    .content-container {
+        max-width: 800px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+    }
+
+    .page-title {
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        font-weight: 800;
+        margin-bottom: 50px;
+        background: linear-gradient(to right, #f8fafc, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+    }
+
+    .section-block {
+        background: var(--bg-card);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 40px;
+        border-radius: 24px;
+        margin-bottom: 40px;
+        transition: transform 0.3s ease;
+    }
+
+    .section-block:hover {
+        transform: translateY(-5px);
+        border-color: rgba(99, 102, 241, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .section-text {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        line-height: 1.7;
+        margin-bottom: 15px;
+    }
+
+    .highlight-quote {
+        position: relative;
+        padding: 30px 40px;
+        margin: 30px 0;
+        background: rgba(99, 102, 241, 0.1);
+        border-left: 4px solid var(--primary);
+        border-radius: 0 16px 16px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        line-height: 1.6;
+        font-style: italic;
+    }
+
+    .highlight-quote::before {
+        content: '"';
+        position: absolute;
+        top: 10px;
+        left: 15px;
+        font-size: 4rem;
+        color: rgba(99, 102, 241, 0.2);
+        font-family: serif;
+        line-height: 1;
+    }
+
+    .cta-bottom {
+        text-align: center;
+        margin-top: 60px;
+    }
+
+    .cta-button {
+        font-size: 1.15rem;
+        padding: 18px 45px;
+        border-radius: 50px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn {
+        padding: 14px 25px;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        display: inline-block;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        color: white;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1 class="page-title">Por que o Mentor existe?</h1>
+
+    <section class="section-block">
+        <h2 class="section-title">🛑 O Problema: A Dependência Cognitiva</h2>
+        <p class="section-text">O avanço acelerado da Inteligência Artificial trouxe ferramentas incrivelmente
+            capazes de resolver problemas. No entanto, o uso passivo da IA — tratando-a como uma "muleta" ou um
+            oráculo — inibe o <strong>pensamento crítico</strong> e prejudica drasticamente a retenção de
+            conhecimento.</p>
+        <p class="section-text">Estudos recentes de instituições renomadas, como o <strong>MIT</strong> e
+            <strong>Harvard</strong>, apontam um risco real: a delegação contínua do esforço intelectual para a
+            máquina pode atrofiar o desenvolvimento cognitivo humano. Quando recebemos respostas prontas sem
+            processá-las, nós paramos de aprender.</p>
+    </section>
+
+    <section class="section-block">
+        <h2 class="section-title">💡 Nossa Proposta: O Tutor Socrático</h2>
+        <p class="section-text">O Mentor nasceu para inverter a lógica da passividade tecnológica. Ao invés de
+            ser um simples gerador de respostas, ele foi desenhado para atuar como o seu <strong>tutor socrático
+                pessoal</strong>.</p>
+        <p class="section-text">Nós utilizamos trilhas de conhecimento estruturadas e um sistema avançado de
+            questionamentos reflexivos. O Mentor não faz o trabalho por você; ele <strong>guia o seu
+                raciocínio</strong> através de perguntas bem direcionadas, garantindo que você compreenda
+            profundamente o tema e retenha a informação a longo prazo.</p>
+    </section>
+
+    <div class="highlight-quote">
+        "Promover o desenvolvimento humano autônomo e a qualificação profissional crítica através de um uso
+        tecnológico consciente e transformador."
+    </div>
+
+    <div class="cta-bottom">
+        <a href="{% url 'login_page' %}" class="btn btn-primary cta-button">Ficou interessado? Comece sua
+            jornada agora</a>
+    </div>
+</div>
+{% endblock %}

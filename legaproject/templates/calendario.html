@@ -1,0 +1,579 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendário de Estudos - Mentor{% endblock %}
+
+{% block extra_css %}
+<!-- FullCalendar CSS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+
+<style>
+    .calendar-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        flex: 1;
+        padding: 40px 20px;
+        min-height: calc(100vh - 180px);
+    }
+
+    .container {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 1100px;
+        margin: 20px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .header h2 {
+        margin: 0;
+        color: #38bdf8;
+        font-size: 1.8rem;
+        letter-spacing: -0.025em;
+    }
+
+    .btn-back {
+        text-decoration: none;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+        background: rgba(148, 163, 184, 0.1);
+        color: #f8fafc;
+        border-color: #94a3b8;
+    }
+
+    .btn-new-task {
+        background: linear-gradient(to right, #38bdf8, #0ea5e9);
+        color: #0f172a;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-new-task:hover {
+        box-shadow: 0 4px 10px rgba(56,189,248,0.3);
+    }
+
+    /* Customizando o FullCalendar para Dark Mode */
+    #calendar {
+        color: #f8fafc;
+    }
+    
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: rgba(148, 163, 184, 0.2);
+    }
+    
+    .fc-theme-standard .fc-scrollgrid {
+        border-color: rgba(148, 163, 184, 0.2);
+    }
+
+    .fc .fc-button-primary {
+        background-color: #0f172a;
+        border-color: rgba(56, 189, 248, 0.3);
+        color: #38bdf8;
+    }
+    
+    .fc .fc-button-primary:hover {
+        background-color: #1e293b;
+        border-color: #38bdf8;
+    }
+
+    .fc .fc-button-primary:not(:disabled).fc-button-active, 
+    .fc .fc-button-primary:not(:disabled):active {
+        background-color: #38bdf8;
+        border-color: #38bdf8;
+        color: #fff;
+    }
+
+    .fc-day-today {
+        background-color: rgba(56, 189, 248, 0.1) !important;
+    }
+
+    .fc-event {
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 4px;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .fc-event-title {
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .loading-indicator {
+        text-align: center;
+        color: #38bdf8;
+        font-size: 1rem;
+        font-style: italic;
+        margin-top: 20px;
+        padding: 20px;
+    }
+
+    /* Modal de Edição (estilo Notion Peek) */
+    .edit-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(5px);
+    }
+    
+    .edit-modal {
+        background: #1e293b;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 16px;
+        width: 400px;
+        max-width: 90%;
+        padding: 25px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .edit-modal h3 {
+        margin-top: 0;
+        color: #f8fafc;
+        margin-bottom: 5px;
+    }
+
+    .edit-modal .modal-subtitle {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-bottom: 20px;
+    }
+
+    .edit-modal label {
+        display: block;
+        color: #cbd5e1;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .edit-modal select, 
+    .edit-modal input[type="date"],
+    .edit-modal input[type="text"],
+    .edit-modal input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid #334155;
+        border-radius: 8px;
+        color: #fff;
+        margin-bottom: 15px;
+        box-sizing: border-box;
+    }
+    
+    .edit-modal select:focus, 
+    .edit-modal input[type="date"]:focus,
+    .edit-modal input[type="text"]:focus,
+    .edit-modal input[type="number"]:focus {
+        outline: none;
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 2px rgba(56,189,248,0.2);
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid #334155;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-cancel:hover {
+        background: rgba(255,255,255,0.05);
+    }
+
+    .btn-save {
+        background: linear-gradient(to right, #38bdf8, #0ea5e9);
+        color: #0f172a;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-save:hover {
+        box-shadow: 0 4px 10px rgba(56,189,248,0.3);
+    }
+    
+    .btn-link-roadmap {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #38bdf8;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+    .btn-link-roadmap:hover {
+        color: #0ea5e9;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calendar-wrapper">
+    <div class="container">
+        <div class="header">
+            <h2>Meu Calendário de Estudos</h2>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn-new-task" onclick="openCreateModal()">+ Nova Tarefa</button>
+                <a href="/" class="btn-back">← Voltar</a>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading-indicator">
+            Carregando calendário... Aguarde.
+        </div>
+
+        <div id="calendar" style="display: none;"></div>
+    </div>
+</div>
+
+<!-- Modal de Edição de Tarefa -->
+<div class="edit-modal-overlay" id="editModalOverlay">
+    <div class="edit-modal">
+        <h3 id="modalTaskTitle">Título da Tarefa</h3>
+        <div class="modal-subtitle" id="modalTaskModule">Módulo X</div>
+        
+        <input type="hidden" id="modalTaskId">
+        <input type="hidden" id="modalRoadmapId">
+
+        <label for="modalTaskStatus">Status</label>
+        <select id="modalTaskStatus">
+            <option value="pendente">Pendente</option>
+            <option value="em_andamento">Em Andamento</option>
+            <option value="concluido">Concluído</option>
+        </select>
+
+        <label for="modalTaskDate">Data Agendada</label>
+        <input type="date" id="modalTaskDate">
+
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeEditModal()">Cancelar</button>
+            <button class="btn-save" onclick="saveTaskEdit()">Salvar</button>
+        </div>
+
+        <a href="#" class="btn-link-roadmap" id="modalBtnGoRoadmap">Ir para o exercício desta trilha →</a>
+    </div>
+</div>
+
+<!-- Modal de Criação de Tarefa -->
+<div class="edit-modal-overlay" id="createModalOverlay">
+    <div class="edit-modal">
+        <h3>Adicionar Nova Tarefa</h3>
+        <div class="modal-subtitle">Escolha o dia, o módulo e crie sua atividade.</div>
+
+        <label for="createTaskTitle">Título da Tarefa</label>
+        <input type="text" id="createTaskTitle" placeholder="Ex: Fazer resumo de matemática" required>
+
+        <label for="createTaskDate">Data Agendada</label>
+        <input type="date" id="createTaskDate" required>
+        
+        <label for="createTaskTime">Tempo Estimado (minutos)</label>
+        <input type="number" id="createTaskTime" value="30" min="5" required>
+
+        <label for="createTaskModule">Trilha / Módulo</label>
+        <select id="createTaskModule" required>
+            <option value="">Carregando trilhas...</option>
+        </select>
+        
+        <label for="createTaskDifficulty">Dificuldade (1 a 5)</label>
+        <select id="createTaskDifficulty" required>
+            <option value="1">1 - Muito Fácil</option>
+            <option value="2">2 - Fácil</option>
+            <option value="3" selected>3 - Médio</option>
+            <option value="4">4 - Difícil</option>
+            <option value="5">5 - Muito Difícil</option>
+        </select>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeCreateModal()">Cancelar</button>
+            <button class="btn-save" onclick="saveNewTask()">Criar Tarefa</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', async function () {
+        const accessToken = localStorage.getItem('access_token');
+        if (!accessToken) {
+            window.location.href = '/login/';
+            return;
+        }
+
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const calendarEl = document.getElementById('calendar');
+
+        async function loadRoadmaps() {
+            try {
+                const resp = await fetch('/api/roadmaps/opcoes/', {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                if (resp.status === 200) {
+                    const roadmaps = await resp.json();
+                    const select = document.getElementById('createTaskModule');
+                    select.innerHTML = '<option value="">Selecione um módulo...</option>';
+                    roadmaps.forEach(r => {
+                        if (r.modulos && r.modulos.length > 0) {
+                            const optgroup = document.createElement('optgroup');
+                            optgroup.label = r.assunto;
+                            r.modulos.forEach(m => {
+                                const opt = document.createElement('option');
+                                opt.value = m.id;
+                                opt.textContent = m.nome_modulo;
+                                optgroup.appendChild(opt);
+                            });
+                            select.appendChild(optgroup);
+                        }
+                    });
+                }
+            } catch(e) { console.error('Erro ao carregar trilhas:', e); }
+        }
+
+        loadRoadmaps();
+
+        try {
+            const response = await fetch('/api/tarefas/calendario/', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (response.status === 200) {
+                const eventos = await response.json();
+                
+                loadingIndicator.style.display = 'none';
+                calendarEl.style.display = 'block';
+
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'pt-br',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,listWeek'
+                    },
+                    buttonText: {
+                        today: 'Hoje',
+                        month: 'Mês',
+                        week: 'Semana',
+                        list: 'Lista'
+                    },
+                    events: eventos,
+                    editable: true, // Permite Drag and Drop
+                    droppable: true,
+                    dateClick: function(info) {
+                        document.getElementById('createTaskDate').value = info.dateStr;
+                        document.getElementById('createTaskTitle').value = '';
+                        document.getElementById('createTaskTime').value = '30';
+                        document.getElementById('createTaskDifficulty').value = '3';
+                        document.getElementById('createModalOverlay').style.display = 'flex';
+                    },
+                    eventDrop: async function(info) {
+                        const taskId = info.event.id;
+                        let newDate = info.event.startStr.split('T')[0]; 
+
+                        try {
+                            const resp = await fetch(`/api/tarefas/${taskId}/agendar/`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${accessToken}`,
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                },
+                                body: JSON.stringify({ data_agendada: newDate })
+                            });
+                            if (resp.status !== 200) {
+                                showModalAlert('Falha ao reagendar a tarefa.', 'Erro');
+                                info.revert();
+                            }
+                        } catch(e) {
+                            console.error(e);
+                            showModalAlert('Erro de conexão.', 'Erro');
+                            info.revert();
+                        }
+                    },
+                    eventClick: function(info) {
+                        const props = info.event.extendedProps;
+                        document.getElementById('modalTaskId').value = info.event.id;
+                        document.getElementById('modalRoadmapId').value = props.roadmap_id;
+                        document.getElementById('modalTaskTitle').textContent = info.event.title;
+                        document.getElementById('modalTaskModule').textContent = props.modulo;
+                        document.getElementById('modalTaskStatus').value = props.status;
+                        
+                        // Extrai a data no formato YYYY-MM-DD
+                        let d = info.event.start;
+                        let dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                        document.getElementById('modalTaskDate').value = dateStr;
+                        
+                        document.getElementById('modalBtnGoRoadmap').href = `/tarefas/?roadmap_id=${props.roadmap_id}`;
+                        
+                        document.getElementById('editModalOverlay').style.display = 'flex';
+                    }
+                });
+
+                calendar.render();
+
+            } else if (response.status === 401 || response.status === 403) {
+                await showModalAlert('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
+                localStorage.clear();
+                window.location.href = '/login/';
+            } else {
+                loadingIndicator.innerHTML = 'Ocorreu um erro ao carregar o calendário.';
+            }
+        } catch (error) {
+            console.error('Erro ao buscar calendário:', error);
+            loadingIndicator.innerHTML = 'Erro de conexão com o servidor.';
+        }
+    });
+
+    window.closeEditModal = function() {
+        document.getElementById('editModalOverlay').style.display = 'none';
+    };
+
+    window.saveTaskEdit = async function() {
+        const taskId = document.getElementById('modalTaskId').value;
+        const newStatus = document.getElementById('modalTaskStatus').value;
+        const newDate = document.getElementById('modalTaskDate').value;
+        const accessToken = localStorage.getItem('access_token');
+
+        try {
+            // Atualiza data
+            const respDate = await fetch(`/api/tarefas/${taskId}/agendar/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ data_agendada: newDate })
+            });
+
+            // Atualiza status
+            const respStatus = await fetch(`/api/tarefas/${taskId}/status/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (respDate.status === 200 && respStatus.status === 200) {
+                closeEditModal();
+                location.reload(); // Recarrega para ver a nova cor e data aplicadas
+            } else {
+                showModalAlert('Falha ao salvar edições.', 'Erro');
+            }
+        } catch(e) {
+            console.error(e);
+            showModalAlert('Erro de conexão.', 'Erro');
+        }
+    };
+
+    window.openCreateModal = function() {
+        let d = new Date();
+        let dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        document.getElementById('createTaskDate').value = dateStr;
+        document.getElementById('createTaskTitle').value = '';
+        document.getElementById('createTaskTime').value = '30';
+        document.getElementById('createTaskDifficulty').value = '3';
+        document.getElementById('createTaskModule').value = '';
+        document.getElementById('createModalOverlay').style.display = 'flex';
+    };
+
+    window.closeCreateModal = function() {
+        document.getElementById('createModalOverlay').style.display = 'none';
+    };
+
+    window.saveNewTask = async function() {
+        const titulo = document.getElementById('createTaskTitle').value;
+        const data_agendada = document.getElementById('createTaskDate').value;
+        const tempo_estimado = document.getElementById('createTaskTime').value;
+        const modulo = document.getElementById('createTaskModule').value;
+        const pontos_dificuldade = document.getElementById('createTaskDifficulty').value;
+        const accessToken = localStorage.getItem('access_token');
+        
+        if (!titulo || !data_agendada || !tempo_estimado || !modulo) {
+            showModalAlert('Preencha todos os campos obrigatórios!', 'Atenção');
+            return;
+        }
+
+        try {
+            const resp = await fetch('/api/tarefas/criar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    titulo: titulo,
+                    data_agendada: data_agendada,
+                    tempo_estimado: tempo_estimado,
+                    modulo: modulo,
+                    pontos_dificuldade: pontos_dificuldade
+                })
+            });
+
+            if (resp.status === 201) {
+                closeCreateModal();
+                location.reload();
+            } else {
+                showModalAlert('Falha ao criar tarefa.', 'Erro');
+            }
+        } catch(e) {
+            console.error(e);
+            showModalAlert('Erro de conexão.', 'Erro');
+        }
+    };
+</script>
+{% endblock %}

@@ -1,204 +1,162 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Roadmap - Mentor</title>
-    
-    <!-- Biblioteca Marked.js via CDN para renderizar Markdown de forma segura e limpa -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% block title %}Gerador de Roadmap - Mentor{% endblock %}
 
-    <style>
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-            color: #f8fafc;
-        }
+{% block extra_css %}
+<style>
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        padding: 40px 20px;
+        min-height: calc(100vh - 180px);
+    }
 
-        .container {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 30px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 800px;
-            margin: 20px;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-        }
+    .container {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 800px;
+        margin: 20px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+    }
 
-        /* Cabeçalho */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(56, 189, 248, 0.3);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
+    /* Cabeçalho */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
 
-        .header h2 {
-            margin: 0;
-            color: #38bdf8;
-            font-size: 1.5rem;
-            letter-spacing: -0.025em;
-        }
+    .header h2 {
+        margin: 0;
+        color: #38bdf8;
+        font-size: 1.5rem;
+        letter-spacing: -0.025em;
+    }
 
-        .btn-back {
-            text-decoration: none;
-            color: #94a3b8;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 8px 16px;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
+    .btn-back {
+        text-decoration: none;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
 
-        .btn-back:hover {
-            background: rgba(148, 163, 184, 0.1);
-            color: #f8fafc;
-            border-color: #94a3b8;
-        }
+    .btn-back:hover {
+        background: rgba(148, 163, 184, 0.1);
+        color: #f8fafc;
+        border-color: #94a3b8;
+    }
 
-        /* Formulário e Scroll */
-        .form-area {
-            overflow-y: auto;
-            padding-right: 10px;
-            scrollbar-width: thin;
-            scrollbar-color: #334155 transparent;
-        }
+    /* Formulário e Scroll */
+    .form-area {
+        overflow-y: auto;
+        padding-right: 10px;
+        scrollbar-width: thin;
+        scrollbar-color: #334155 transparent;
+    }
 
-        .form-area::-webkit-scrollbar { width: 6px; }
-        .form-area::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    .form-area::-webkit-scrollbar { width: 6px; }
+    .form-area::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
-        .intro-text {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
+    .intro-text {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
 
-        .form-group {
-            margin-bottom: 18px;
-        }
+    .form-group {
+        margin-bottom: 18px;
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #cbd5e1;
-        }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #cbd5e1;
+    }
 
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid #334155;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.95rem;
-            transition: all 0.3s;
-            box-sizing: border-box;
-        }
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 12px;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid #334155;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        box-sizing: border-box;
+    }
 
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
-        }
+    .form-group input:focus, .form-group select:focus {
+        outline: none;
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    }
 
-        .btn-generate {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 14px 0 rgba(34, 197, 94, 0.3);
-        }
+    .btn-generate {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px 0 rgba(34, 197, 94, 0.3);
+    }
 
-        .btn-generate:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
-        }
+    .btn-generate:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    }
 
-        .btn-generate:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            filter: grayscale(0.5);
-        }
+    .btn-generate:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        filter: grayscale(0.5);
+    }
 
-        .loading-indicator {
-            display: none;
-            text-align: center;
-            color: #38bdf8;
-            font-size: 0.9rem;
-            font-style: italic;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(56, 189, 248, 0.1);
-            border-radius: 8px;
-        }
+    .loading-indicator {
+        display: none;
+        text-align: center;
+        color: #38bdf8;
+        font-size: 0.9rem;
+        font-style: italic;
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(56, 189, 248, 0.1);
+        border-radius: 8px;
+    }
 
-        .result-area {
-            display: none;
-            margin-top: 25px;
-            padding: 25px;
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            border-radius: 12px;
-            overflow-y: auto;
-            max-height: 60vh;
-            line-height: 1.6;
-            color: #e2e8f0;
-        }
-        
-        .result-area h1, .result-area h2, .result-area h3 {
-            color: #38bdf8;
-            margin-top: 1.5rem;
-            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
-            padding-bottom: 8px;
-        }
-        
-        .result-area ul, .result-area ol {
-            padding-left: 25px;
-        }
 
-        .result-area li {
-            margin-bottom: 10px;
-        }
-        
-        .result-area code {
-            background-color: #1e293b;
-            color: #f472b6;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
-        }
 
-        ::placeholder { color: #475569; }
-    </style>
-</head>
+    ::placeholder { color: #475569; }
+</style>
+{% endblock %}
 
-<body>
-
+{% block content %}
+<div class="auth-wrapper">
     <div class="container">
         <div class="header">
             <h2>Gerador de Roadmap Educacional</h2>
@@ -225,12 +183,38 @@
 
                 <div class="form-group">
                     <label for="tempo_pretendido">Qual o prazo pretendido?</label>
-                    <input type="text" id="tempo_pretendido" required placeholder="Ex: 6 meses, 1 ano, 3 semanas...">
+                    <select id="tempo_pretendido" required>
+                        <option value="">Selecione...</option>
+                        <option value="Até 1 mês">Até 1 mês</option>
+                        <option value="1 a 3 meses">1 a 3 meses</option>
+                        <option value="3 a 6 meses">3 a 6 meses</option>
+                        <option value="6 meses a 1 ano">6 meses a 1 ano</option>
+                        <option value="Mais de 1 ano">Mais de 1 ano</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="horas_diarias">Quantas horas por dia pode estudar?</label>
-                    <input type="text" id="horas_diarias" required placeholder="Ex: 2 horas, 30 minutos...">
+                    <label for="horas_diarias">Quanto tempo por dia pode estudar?</label>
+                    <select id="horas_diarias" required>
+                        <option value="">Selecione...</option>
+                        <option value="10 minutos">10 minutos</option>
+                        <option value="30 minutos">30 minutos</option>
+                        <option value="1 hora">1 hora</option>
+                        <option value="1 hora e 30 minutos">1 hora e 30 minutos</option>
+                        <option value="2 horas">2 horas</option>
+                        <option value="2 horas e 30 minutos">2 horas e 30 minutos</option>
+                        <option value="3 horas">3 horas</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="periodo_estudo">Em qual período do dia você irá estudar?</label>
+                    <select id="periodo_estudo" required>
+                        <option value="">Selecione...</option>
+                        <option value="Manhã">Manhã</option>
+                        <option value="Tarde">Tarde</option>
+                        <option value="Noite">Noite</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -263,86 +247,79 @@
             </div>
         </div>
 
-        <div class="result-area" id="resultArea">
-            <!-- O Markdown parseado pelo marked.js vai aparecer aqui -->
-        </div>
+
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Verifica a autenticação antes de qualquer coisa
-            const accessToken = localStorage.getItem('access_token');
-            if (!accessToken) {
-                window.location.href = '/login/';
-                return;
-            }
+{% block extra_js %}
 
-            const roadmapForm = document.getElementById('roadmapForm');
-            const btnGenerate = document.getElementById('btnGenerate');
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const resultArea = document.getElementById('resultArea');
 
-            roadmapForm.addEventListener('submit', async function (event) {
-                event.preventDefault();
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Verifica a autenticação antes de qualquer coisa
+        const accessToken = localStorage.getItem('access_token');
+        if (!accessToken) {
+            window.location.href = '/login/';
+            return;
+        }
 
-                // 1. Extração dos dados do form
-                const payload = {
-                    assunto: document.getElementById('assunto').value,
-                    objetivo: document.getElementById('objetivo').value,
-                    tempo_pretendido: document.getElementById('tempo_pretendido').value,
-                    horas_diarias: document.getElementById('horas_diarias').value,
-                    nivel: document.getElementById('nivel').value,
-                    formato: document.getElementById('formato').value
-                };
+        const roadmapForm = document.getElementById('roadmapForm');
+        const btnGenerate = document.getElementById('btnGenerate');
+        const loadingIndicator = document.getElementById('loadingIndicator');
 
-                // Oculta área de resultado antiga, trava form e mostra loading
-                resultArea.style.display = 'none';
-                btnGenerate.disabled = true;
-                loadingIndicator.style.display = 'block';
+        roadmapForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
 
-                const csrfToken = roadmapForm.querySelector('[name=csrfmiddlewaretoken]').value;
+            // 1. Extração dos dados do form
+            const payload = {
+                assunto: document.getElementById('assunto').value,
+                objetivo: document.getElementById('objetivo').value,
+                tempo_pretendido: document.getElementById('tempo_pretendido').value,
+                horas_diarias: document.getElementById('horas_diarias').value,
+                nivel: document.getElementById('nivel').value,
+                formato: document.getElementById('formato').value,
+                periodo_estudo: document.getElementById('periodo_estudo').value
+            };
 
-                try {
-                    // 2. Dispara o fetch POST para a API
-                    // A API no backend se encarregará de buscar os dados sensíveis do usuário na sessão
-                    const response = await fetch('/api/mentor/interagir', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrfToken,
-                            'Authorization': `Bearer ${accessToken}`
-                        },
-                        body: JSON.stringify(payload)
-                    });
+            // Trava form e mostra loading
+            btnGenerate.disabled = true;
+            loadingIndicator.style.display = 'block';
 
-                    if (response.status === 200) {
-                        const data = await response.json();
-                        
-                        // 3. Usa a biblioteca 'marked' para renderizar o Markdown em HTML
-                        // O backend já configurou o prompt para a IA devolver Markdown limpo
-                        resultArea.innerHTML = marked.parse(data.response);
-                        
-                        // Exibe a área de resultado rolável
-                        resultArea.style.display = 'block';
-                        
-                    } else if (response.status === 401 || response.status === 403) {
-                        alert('Sua sessão expirou. Faça login novamente.');
-                        localStorage.clear();
-                        window.location.href = '/login/';
-                    } else {
-                        const errData = await response.json();
-                        alert(`Erro da API: ${errData.error || 'Falha ao processar.'}`);
-                    }
-                } catch (error) {
-                    console.error('Erro na geração do roadmap:', error);
-                    alert('Erro de conexão com o servidor. Tente novamente mais tarde.');
-                } finally {
-                    btnGenerate.disabled = false;
-                    loadingIndicator.style.display = 'none';
+            const csrfToken = roadmapForm.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            try {
+                // 2. Dispara o fetch POST para a API
+                // A API no backend se encarregará de buscar os dados sensíveis do usuário na sessão
+                const response = await fetch('/api/mentor/interagir', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.status === 200) {
+                    await showModalAlert('Trilha gerada e salva com sucesso!', 'Sucesso');
+                    window.location.href = '/trilhas/';
+                    
+                } else if (response.status === 401 || response.status === 403) {
+                    await showModalAlert('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
+                    window.location.href = '/login/';
+                } else {
+                    const errData = await response.json();
+                    await showModalAlert(`Erro da API: ${errData.error || 'Falha ao processar.'}`, 'Erro');
                 }
-            });
+            } catch (error) {
+                console.error('Erro na requisição:', error);
+                await showModalAlert('Erro de conexão com o servidor. Tente novamente mais tarde.', 'Erro de Conexão');
+            } finally {
+                btnGenerate.disabled = false;
+                loadingIndicator.style.display = 'none';
+            }
         });
-    </script>
-</body>
-
-</html>
+    });
+</script>
+{% endblock %}
