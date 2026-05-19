@@ -4,6 +4,10 @@
 
 {% block extra_css %}
 <style>
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
     /* Hero Section */
     .hero-section {
         min-height: calc(100vh - 80px);
@@ -13,27 +17,30 @@
         padding: 40px 20px;
         text-align: center;
         position: relative;
+        width: 100%;
+        max-width: 100%;
     }
 
     .hero-content {
         max-width: 900px;
         margin: 0 auto;
         z-index: 2;
+        width: 100%;
     }
 
     .hero-title {
-        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-size: clamp(2rem, 5vw, 4rem);
         font-weight: 800;
         margin-bottom: 24px;
         background: linear-gradient(to right, #f8fafc, #818cf8, #c084fc);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        line-height: 1.15;
+        line-height: 1.2;
         letter-spacing: -0.02em;
     }
 
     .hero-subtitle {
-        font-size: clamp(1.1rem, 2vw, 1.25rem);
+        font-size: clamp(1rem, 2vw, 1.25rem);
         color: var(--text-muted);
         line-height: 1.6;
         margin-bottom: 40px;
@@ -43,8 +50,8 @@
     }
 
     .cta-button {
-        font-size: 1.1rem;
-        padding: 16px 40px;
+        font-size: 1.05rem;
+        padding: 16px 36px;
         border-radius: 50px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -55,6 +62,7 @@
         background: linear-gradient(to right, var(--primary), var(--secondary));
         color: white;
         transition: all 0.3s ease;
+        max-width: 100%;
     }
 
     .cta-button:hover {
@@ -65,26 +73,31 @@
 
     /* Benefits Section */
     .benefits-section {
-        padding: 100px 20px 120px;
+        padding: 80px 20px;
         background: rgba(15, 23, 42, 0.4);
         border-top: 1px solid rgba(255, 255, 255, 0.05);
         position: relative;
+        width: 100%;
+        max-width: 100%;
     }
 
     .benefits-container {
         max-width: 1200px;
         margin: 0 auto;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 40px;
-        margin-bottom: 80px;
+        /* Corrigido minmax para não estourar em telas de 360px */
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 30px;
+        margin-bottom: 60px;
+        width: 100%;
     }
 
     .benefit-card {
         background: rgba(30, 41, 59, 0.6);
         backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 40px 35px;
+        padding: 35px 25px;
         border-radius: 24px;
         text-align: left;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -98,27 +111,27 @@
     }
 
     .benefit-icon {
-        font-size: 3rem;
-        margin-bottom: 25px;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
         display: inline-block;
         background: rgba(99, 102, 241, 0.1);
-        padding: 15px;
+        padding: 12px;
         border-radius: 16px;
         border: 1px solid rgba(99, 102, 241, 0.2);
     }
 
     .benefit-title {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
         font-weight: 700;
         color: var(--text-main);
-        margin-bottom: 16px;
+        margin-bottom: 12px;
         letter-spacing: -0.01em;
         margin-top: 0;
     }
 
     .benefit-text {
         color: var(--text-muted);
-        font-size: 1.1rem;
+        font-size: 1rem;
         line-height: 1.6;
         margin: 0;
     }
@@ -134,6 +147,7 @@
         max-width: 1200px;
         margin: 0 auto;
         width: 100%;
+        max-width: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -141,7 +155,7 @@
     }
 
     .dashboard-title {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: 800;
         margin-bottom: 40px;
         background: linear-gradient(to right, #f8fafc, #818cf8);
@@ -153,7 +167,7 @@
     .dashboard-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 30px;
+        gap: 25px;
         width: 100%;
     }
 
@@ -172,14 +186,16 @@
     .dash-card {
         background: rgba(30, 41, 59, 0.6);
         backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 30px;
+        padding: 25px;
         border-radius: 20px;
         text-align: left;
         transition: all 0.3s ease;
         text-decoration: none;
         display: flex;
         flex-direction: column;
+        width: 100%;
     }
 
     .dash-card:hover {
@@ -190,17 +206,17 @@
     }
 
     .dash-icon {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         margin-bottom: 15px;
         background: rgba(255, 255, 255, 0.05);
         display: inline-flex;
-        padding: 15px;
+        padding: 12px;
         border-radius: 14px;
         align-self: flex-start;
     }
 
     .dash-title {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         font-weight: 700;
         color: var(--text-main);
         margin-bottom: 10px;
@@ -209,30 +225,93 @@
 
     .dash-desc {
         color: var(--text-muted);
-        font-size: 1rem;
+        font-size: 0.95rem;
         line-height: 1.5;
         flex-grow: 1;
         margin: 0;
     }
 
-    h1,
-    p {
+    h1, h2, h3, p {
         margin: 0;
+    }
+
+    /* --- REGRAS ESPECÍFICAS PARA SMARTPHONES (360x740 a 480px) --- */
+    @media (max-width: 480px) {
+        .hero-section {
+            padding: 95px 15px 40px 15px; /* Compensa o menu superior absoluto */
+            min-height: auto;
+        }
+
+        .hero-title {
+            font-size: 1.65rem;
+            margin-bottom: 16px;
+        }
+
+        .hero-subtitle {
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .cta-button {
+            font-size: 0.85rem;
+            padding: 14px 20px;
+            width: 100%; /* Botão vira bloco inteiro ocupando a tela de forma harmoniosa */
+            text-align: center;
+        }
+
+        .benefits-section {
+            padding: 50px 15px;
+        }
+
+        .benefits-container {
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .benefit-card {
+            padding: 24px 20px;
+            border-radius: 16px;
+        }
+
+        .benefit-title {
+            font-size: 1.2rem;
+        }
+
+        .benefit-text {
+            font-size: 0.9rem;
+        }
+
+        .dashboard-section {
+            padding: 95px 15px 40px 15px;
+        }
+
+        .dashboard-title {
+            font-size: 1.65rem;
+            margin-bottom: 25px;
+        }
+
+        .dash-card {
+            padding: 20px;
+            border-radius: 16px;
+        }
+
+        .dash-title {
+            font-size: 1.15rem;
+        }
+
+        .dash-desc {
+            font-size: 0.9rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Visão de Visitante (Deslogado) -->
 <div id="guest-view">
     <section class="hero-section">
         <div class="hero-content">
-            <h1 class="hero-title">Bem-vindo ao Mentor:<br> A sua Inteligência Artificial para a Aprendizagem Ativa.
-            </h1>
-            <p class="hero-subtitle">O Mentor não é apenas mais um chat. Ele é um sistema de trilhas de conhecimento
-                mediado por IA que atua como o seu tutor socrático pessoal. Nossa missão é guiar você na construção
-                do seu próprio conhecimento, ajudando a desenvolver o seu pensamento crítico.</p>
-            <br><br>
+            <h1 class="hero-title">Bem-vindo ao Mentor:<br>A sua Inteligência Artificial para a Aprendizagem Ativa.</h1>
+            <p class="hero-subtitle">O Mentor não é apenas mais um chat. Ele é um sistema de trilhas de conhecimento mediado por IA que atua como o seu tutor socrático pessoal. Nossa missão é guiar você na construção do seu próprio conhecimento, ajudando a desenvolver o seu pensamento crítico.</p>
             <a href="{% url 'login_page' %}" class="cta-button">comece sua jornada de aprendizado</a>
         </div>
     </section>
@@ -242,22 +321,19 @@
             <article class="benefit-card">
                 <div class="benefit-icon">🧠</div>
                 <h3 class="benefit-title">Fim da Dívida Cognitiva</h3>
-                <p class="benefit-text">Chega de delegar o seu raciocínio. O Mentor te ajuda a reter informações de
-                    verdade, sem depender de respostas prontas.</p>
+                <p class="benefit-text">Chega de delegar o seu raciocínio. O Mentor te ajuda a reter informações de verdade, sem depender de respostas prontas.</p>
             </article>
 
             <article class="benefit-card">
                 <div class="benefit-icon">🎯</div>
                 <h3 class="benefit-title">Trilhas Personalizadas</h3>
-                <p class="benefit-text">Estude no seu ritmo com questionamentos reflexivos e direcionados exatamente
-                    para o que você precisa aprender.</p>
+                <p class="benefit-text">Estude no seu ritmo com questionamentos reflexivos e direcionados exatamente para o que você precisa aprender.</p>
             </article>
 
             <article class="benefit-card">
                 <div class="benefit-icon">⚡</div>
                 <h3 class="benefit-title">Aprendizagem Ativa</h3>
-                <p class="benefit-text">O método socrático garante que você seja o protagonista do seu
-                    desenvolvimento acadêmico e profissional.</p>
+                <p class="benefit-text">O método socrático garante que você seja o protagonista do seu desenvolvimento acadêmico e profissional.</p>
             </article>
         </div>
 
@@ -267,7 +343,6 @@
     </section>
 </div>
 
-<!-- Visão de Dashboard (Logado) -->
 <div id="logged-in-view" class="hidden">
     <section class="dashboard-section">
         <h2 class="dashboard-title">Painel de Aprendizagem</h2>
@@ -276,15 +351,13 @@
             <a href="{% url 'roadmap_page' %}" class="dash-card">
                 <div class="dash-icon">🗺️</div>
                 <h3 class="dash-title">Criar Roadmap</h3>
-                <p class="dash-desc">Inicie uma nova trilha de conhecimento personalizada. Utilize nossa IA para guiar
-                    seus estudos através do método socrático e aprendizagem ativa.</p>
+                <p class="dash-desc">Inicie uma nova trilha de conhecimento personalizada. Utilize nossa IA para guiar seus estudos através do método socrático e aprendizagem ativa.</p>
             </a>
 
             <a href="{% url 'roadmaps_page' %}" class="dash-card">
                 <div class="dash-icon">📚</div>
                 <h3 class="dash-title">Trilhas</h3>
-                <p class="dash-desc">Acesse suas trilhas de estudo geradas, acompanhe seu progresso e realize suas
-                    tarefas.</p>
+                <p class="dash-desc">Acesse suas trilhas de estudo geradas, acompanhe seu progresso e realize suas tarefas.</p>
             </a>
 
             <a href="/calendario" class="dash-card">
@@ -299,11 +372,11 @@
                 <p class="dash-desc">Visualize e edite seus dados pessoais, formação e área de atuação.</p>
             </a>
 
-            <a href="/configuracoes" class="dash-card">
+            <!-- <a href="/configuracoes" class="dash-card">
                 <div class="dash-icon">⚙️</div>
                 <h3 class="dash-title">Configurações</h3>
                 <p class="dash-desc">Ajuste suas preferências de sistema, notificações e privacidade.</p>
-            </a>
+            </a> -->
 
         </div>
     </section>
@@ -317,7 +390,6 @@
         const guestView = document.getElementById('guest-view');
         const loggedInView = document.getElementById('logged-in-view');
 
-        // Renderiza o Dashboard apenas se estiver autenticado
         if (token) {
             guestView.classList.add('hidden');
             loggedInView.classList.remove('hidden');

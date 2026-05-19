@@ -3,10 +3,13 @@
 {% block title %}Calendário de Estudos - Mentor{% endblock %}
 
 {% block extra_css %}
-<!-- FullCalendar CSS -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 
 <style>
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
     .calendar-wrapper {
         display: flex;
         justify-content: center;
@@ -14,6 +17,8 @@
         flex: 1;
         padding: 40px 20px;
         min-height: calc(100vh - 180px);
+        width: 100%;
+        max-width: 100%;
     }
 
     .container {
@@ -83,6 +88,7 @@
     /* Customizando o FullCalendar para Dark Mode */
     #calendar {
         color: #f8fafc;
+        width: 100%;
     }
     
     .fc-theme-standard td, .fc-theme-standard th {
@@ -147,6 +153,8 @@
         align-items: center;
         z-index: 9999;
         backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        padding: 10px;
     }
     
     .edit-modal {
@@ -154,9 +162,11 @@
         border: 1px solid rgba(56, 189, 248, 0.3);
         border-radius: 16px;
         width: 400px;
-        max-width: 90%;
+        max-width: 100%;
         padding: 25px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        max-height: 90vh;
+        overflow-y: auto; /* Permite scroll no modal se o teclado do celular abrir */
     }
 
     .edit-modal h3 {
@@ -191,6 +201,7 @@
         color: #fff;
         margin-bottom: 15px;
         box-sizing: border-box;
+        font-size: 16px; /* Evita zoom automático no iOS */
     }
     
     .edit-modal select:focus, 
@@ -251,6 +262,61 @@
         color: #0ea5e9;
         text-decoration: underline;
     }
+
+    /* --- MEDIA QUERIES PARA CELULAR (Focado em 360x740 e menores) --- */
+    @media (max-width: 480px) {
+        .calendar-wrapper {
+            padding: 85px 10px 20px 10px; /* Mais espaço acima para o header fixo da base */
+        }
+
+        .container {
+            padding: 16px;
+            margin: 0;
+            border-radius: 12px;
+        }
+
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .header h2 {
+            font-size: 1.35rem;
+        }
+
+        .header div {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .btn-new-task, .btn-back {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        /* Compactação dos controles nativos do FullCalendar no Mobile */
+        .fc .fc-toolbar {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.15rem !important;
+        }
+
+        .fc .fc-button {
+            padding: 6px 10px !important;
+            font-size: 0.8rem !important;
+        }
+
+        .edit-modal {
+            padding: 16px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -273,7 +339,6 @@
     </div>
 </div>
 
-<!-- Modal de Edição de Tarefa -->
 <div class="edit-modal-overlay" id="editModalOverlay">
     <div class="edit-modal">
         <h3 id="modalTaskTitle">Título da Tarefa</h3>
@@ -301,7 +366,6 @@
     </div>
 </div>
 
-<!-- Modal de Criação de Tarefa -->
 <div class="edit-modal-overlay" id="createModalOverlay">
     <div class="edit-modal">
         <h3>Adicionar Nova Tarefa</h3>
@@ -392,13 +456,17 @@
                 loadingIndicator.style.display = 'none';
                 calendarEl.style.display = 'block';
 
+                // Detecta dinamicamente se é um dispositivo móvel (largura < 480px)
+                const isMobile = window.innerWidth <= 480;
+
                 const calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth',
+                    // Se for mobile usa visualização de Lista Semanal, senão usa Grade Mensal padrão
+                    initialView: isMobile ? 'listWeek' : 'dayGridMonth',
                     locale: 'pt-br',
                     headerToolbar: {
-                        left: 'prev,next today',
+                        left: isMobile ? 'prev,next' : 'prev,next today',
                         center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,listWeek'
+                        right: isMobile ? 'listWeek,dayGridMonth' : 'dayGridMonth,timeGridWeek,listWeek'
                     },
                     buttonText: {
                         today: 'Hoje',
@@ -407,7 +475,7 @@
                         list: 'Lista'
                     },
                     events: eventos,
-                    editable: true, // Permite Drag and Drop
+                    editable: true,
                     droppable: true,
                     dateClick: function(info) {
                         document.getElementById('createTaskDate').value = info.dateStr;
@@ -448,7 +516,6 @@
                         document.getElementById('modalTaskModule').textContent = props.modulo;
                         document.getElementById('modalTaskStatus').value = props.status;
                         
-                        // Extrai a data no formato YYYY-MM-DD
                         let d = info.event.start;
                         let dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
                         document.getElementById('modalTaskDate').value = dateStr;
@@ -460,6 +527,15 @@
                 });
 
                 calendar.render();
+
+                // Ajusta dinamicamente a view caso o usuário mude a orientação do celular (ex: girar a tela)
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth <= 480 && calendar.view.type === 'dayGridMonth') {
+                        calendar.changeView('listWeek');
+                    } else if (window.innerWidth > 480 && calendar.view.type === 'listWeek') {
+                        calendar.changeView('dayGridMonth');
+                    }
+                });
 
             } else if (response.status === 401 || response.status === 403) {
                 await showModalAlert('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
@@ -485,7 +561,6 @@
         const accessToken = localStorage.getItem('access_token');
 
         try {
-            // Atualiza data
             const respDate = await fetch(`/api/tarefas/${taskId}/agendar/`, {
                 method: 'PATCH',
                 headers: {
@@ -496,7 +571,6 @@
                 body: JSON.stringify({ data_agendada: newDate })
             });
 
-            // Atualiza status
             const respStatus = await fetch(`/api/tarefas/${taskId}/status/`, {
                 method: 'PATCH',
                 headers: {
@@ -509,7 +583,7 @@
 
             if (respDate.status === 200 && respStatus.status === 200) {
                 closeEditModal();
-                location.reload(); // Recarrega para ver a nova cor e data aplicadas
+                location.reload();
             } else {
                 showModalAlert('Falha ao salvar edições.', 'Erro');
             }

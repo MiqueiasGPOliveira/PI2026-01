@@ -4,13 +4,18 @@
 
 {% block extra_css %}
 <style>
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
     .auth-wrapper {
         display: flex;
         justify-content: center;
         align-items: center;
         flex: 1;
         padding: 40px 20px;
-        min-height: calc(100vh - 180px);
+        min-height: calc(100vh - 80px);
+        width: 100%;
     }
 
     .container {
@@ -37,6 +42,7 @@
         border-bottom: 1px solid rgba(56, 189, 248, 0.3);
         padding-bottom: 15px;
         margin-bottom: 20px;
+        gap: 15px;
     }
 
     .header h2 {
@@ -55,6 +61,7 @@
         border: 1px solid rgba(148, 163, 184, 0.3);
         border-radius: 8px;
         transition: all 0.2s;
+        white-space: nowrap;
     }
 
     .btn-back:hover {
@@ -75,10 +82,11 @@
     .form-area::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
     .intro-text {
-        color: #94a3b8;
+        color: #22c55e;
+        margin-bottom: 20px;
         font-size: 0.95rem;
-        margin-bottom: 25px;
         line-height: 1.5;
+        margin-top: 0;
     }
 
     .form-group {
@@ -102,7 +110,6 @@
         color: #fff;
         font-size: 0.95rem;
         transition: all 0.3s;
-        box-sizing: border-box;
     }
 
     .form-group input:focus, .form-group select:focus {
@@ -149,9 +156,68 @@
         border-radius: 8px;
     }
 
-
-
     ::placeholder { color: #475569; }
+
+    /* --- REGRAS MOBILE (Telas de 360px a 480px) --- */
+    @media (max-width: 480px) {
+        .auth-wrapper {
+            padding: 95px 12px 40px 12px; /* Espaço para o topo fluído */
+            align-items: flex-start;
+        }
+
+        .container {
+            padding: 20px 16px;
+            margin: 0;
+            max-height: none; /* Destrói a limitação de altura para evitar esmagamento */
+            border-radius: 12px;
+        }
+
+        .header {
+            flex-direction: row; 
+            align-items: center;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .header h2 {
+            font-size: 1.15rem; /* Encolhe o título para não brigar com o botão voltar */
+            line-height: 1.3;
+        }
+
+        .btn-back {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .intro-text {
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .form-area {
+            padding-right: 0; /* Usa a rolagem nativa do corpo da página no mobile */
+            overflow-y: visible; 
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group select {
+            padding: 11px;
+            font-size: 0.9rem;
+        }
+
+        .btn-generate {
+            padding: 12px;
+            font-size: 0.95rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -159,12 +225,12 @@
 <div class="auth-wrapper">
     <div class="container">
         <div class="header">
-            <h2>Gerador de Roadmap Educacional</h2>
+            <h2>Gerador de Roadmap</h2>
             <a href="{% url 'perfil_page' %}" class="btn-back">← Voltar</a>
         </div>
 
         <div class="form-area" id="formArea">
-            <p style="color: #22c55e; margin-bottom: 20px;">
+            <p class="intro-text">
                 Preencha os detalhes abaixo e nossa Inteligência Artificial criará uma trilha de estudos personalizada unindo suas informações do perfil com seu objetivo atual.
             </p>
 
@@ -173,12 +239,12 @@
                 
                 <div class="form-group">
                     <label for="assunto">O que você quer aprender? (Assunto)</label>
-                    <input type="text" id="assunto" required placeholder="Ex: Programação Python, Filosofia, Matemática...">
+                    <input type="text" id="assunto" required placeholder="Ex: Programação Python, Filosofia...">
                 </div>
 
                 <div class="form-group">
                     <label for="objetivo">Qual seu objetivo com isso?</label>
-                    <input type="text" id="objetivo" required placeholder="Ex: Conseguir o primeiro emprego, Passar no vestibular...">
+                    <input type="text" id="objetivo" required placeholder="Ex: Conseguir o primeiro emprego...">
                 </div>
 
                 <div class="form-group">
@@ -246,18 +312,13 @@
                 Analisando seu perfil e montando a trilha perfeita... Aguarde.
             </div>
         </div>
-
-
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Verifica a autenticação antes de qualquer coisa
         const accessToken = localStorage.getItem('access_token');
         if (!accessToken) {
             window.location.href = '/login/';
@@ -271,7 +332,6 @@
         roadmapForm.addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            // 1. Extração dos dados do form
             const payload = {
                 assunto: document.getElementById('assunto').value,
                 objetivo: document.getElementById('objetivo').value,
@@ -282,15 +342,12 @@
                 periodo_estudo: document.getElementById('periodo_estudo').value
             };
 
-            // Trava form e mostra loading
             btnGenerate.disabled = true;
             loadingIndicator.style.display = 'block';
 
             const csrfToken = roadmapForm.querySelector('[name=csrfmiddlewaretoken]').value;
 
             try {
-                // 2. Dispara o fetch POST para a API
-                // A API no backend se encarregará de buscar os dados sensíveis do usuário na sessão
                 const response = await fetch('/api/mentor/interagir', {
                     method: 'POST',
                     headers: {

@@ -11,11 +11,14 @@
         flex: 1;
         padding: 40px 20px;
         min-height: calc(100vh - 180px); /* Account for header and footer */
+        width: 100%;
+        max-width: 100%;
     }
 
     .container {
         background: rgba(30, 41, 59, 0.7);
         backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 40px;
         border-radius: 16px;
@@ -53,7 +56,7 @@
         border-radius: 8px;
         width: 100%;
         transition: all 0.3s ease;
-        box-sizing: border-box;
+        font-size: 16px; /* Evita zoom automático no iOS */
     }
 
     .form-group input:focus {
@@ -78,6 +81,7 @@
         cursor: pointer;
         width: 100%;
         transition: transform 0.2s ease, opacity 0.2s ease;
+        font-size: 1rem;
     }
 
     .btn:hover {
@@ -96,6 +100,44 @@
         display: none;
         line-height: 1.5;
     }
+
+    /* --- CORREÇÃO COMPLETA PARA 360x740 E PROXIMIDADES --- */
+    @media (max-width: 480px) {
+        .auth-wrapper {
+            padding: 90px 12px 30px 12px; /* Espaço superior maior para o Header absoluto respirar */
+            min-height: auto;
+        }
+
+        .container {
+            padding: 22px 16px; /* Encolhe o padding interno para dar largura total aos inputs */
+            max-width: 100%;    /* Garante que o container ocupe a largura correta sem transbordar */
+            border-radius: 12px;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+
+        .form-group input {
+            padding: 10px 12px;
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            padding: 12px;
+            font-size: 0.95rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -104,7 +146,6 @@
     <div class="container">
         <h2>Criar Conta</h2>
         <form id="cadastroForm">
-            <!-- Token de segurança do Django (CSRF) -->
             {% csrf_token %}
 
             <div class="form-group">
@@ -158,18 +199,15 @@
 {% block extra_js %}
 <script>
     document.getElementById('cadastroForm').addEventListener('submit', async function (event) {
-        // Evita o comportamento padrão do POST do HTML
         event.preventDefault();
 
         const form = event.target;
         const errorMessageDiv = document.getElementById('errorMessage');
-        errorMessageDiv.style.display = 'none'; // Esconde o erro antes de tentar
-        errorMessageDiv.innerHTML = ''; // Limpa mensagens anteriores
+        errorMessageDiv.style.display = 'none';
+        errorMessageDiv.innerHTML = '';
 
-        // Extraindo o CSRF Token
         const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        // Montando o payload JSON com os dados completos e com os nomes em português
         const data = {
             nome_completo: form.nome_completo.value,
             usuario: form.usuario.value,
@@ -182,7 +220,6 @@
         };
 
         try {
-            // Fetch para a API
             const response = await fetch("/api/auth/cadastro", {
                 method: 'POST',
                 headers: {
@@ -193,19 +230,15 @@
             });
 
             if (response.status === 200 || response.status === 201) {
-                // Redireciona para o login em caso de sucesso
-                window.location.href = '/login/'; // Adicionada a barra para evitar 301
+                window.location.href = '/login/';
             } else {
-                // Tratamento de Erros de Validação da API
                 const errorData = await response.json();
                 let errorMessages = [];
 
-                // Tratamento customizado para campos únicos usando as novas chaves
                 if (errorData.usuario) errorMessages.push(`<strong>Usuário:</strong> Este apelido já está em uso.`);
                 if (errorData.email) errorMessages.push(`<strong>E-mail:</strong> Este e-mail já está cadastrado.`);
                 if (errorData.telefone) errorMessages.push(`<strong>Telefone:</strong> Este telefone já está cadastrado.`);
 
-                // Adiciona os outros erros que podem vir
                 for (const key in errorData) {
                     if (errorData.hasOwnProperty(key) && !['usuario', 'email', 'telefone'].includes(key)) {
                         errorMessages.push(`<strong>${key}:</strong> ${errorData[key]}`);
@@ -213,7 +246,7 @@
                 }
 
                 errorMessageDiv.innerHTML = errorMessages.join('<br>');
-                errorMessageDiv.style.display = 'block'; // Mostra a div de erro
+                errorMessageDiv.style.display = 'block';
             }
         } catch (error) {
             console.error("Erro na requisição:", error);

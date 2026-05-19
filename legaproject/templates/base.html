@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mentor{% endblock %}</title>
-    <!-- Importação da Fonte Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,18 +14,29 @@
             --text-muted: #94a3b8;
             --bg-card: rgba(30, 41, 59, 0.6);
         }
-
+    
+        /* Reset global crucial para evitar transbordo (overflow) */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+    
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Garante que nada crie barra de rolagem horizontal */
+        }
+    
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg-gradient);
             color: var(--text-main);
-            margin: 0;
             min-height: 100vh;
-            overflow-x: hidden;
             display: flex;
             flex-direction: column;
         }
-
+    
         /* HEADER CLASSES */
         .main-header {
             position: absolute;
@@ -39,14 +49,15 @@
             padding: 20px 40px;
             background: transparent;
             z-index: 1000;
+            width: 100%;
         }
-
+    
         .header-left {
             display: flex;
             align-items: center;
             gap: 30px;
         }
-
+    
         .header-logo {
             font-size: 1.5rem;
             font-weight: 700;
@@ -56,7 +67,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
+    
         .header-link {
             text-decoration: none;
             color: var(--text-muted);
@@ -64,15 +75,15 @@
             font-size: 1rem;
             transition: color 0.3s ease;
         }
-
+    
         .header-link:hover {
             color: var(--text-main);
         }
-
+    
         .user-menu-container {
             position: relative;
         }
-
+    
         .avatar-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -87,19 +98,20 @@
             color: var(--text-main);
             padding: 0;
         }
-
+    
         .avatar-btn:hover {
             background: rgba(255, 255, 255, 0.15);
             border-color: rgba(255, 255, 255, 0.5);
             transform: scale(1.05);
         }
-
+    
         .dropdown-menu {
             position: absolute;
             top: 60px;
             right: 0;
             background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
@@ -111,13 +123,13 @@
             transition: all 0.3s ease;
             text-align: left;
         }
-
+    
         .dropdown-menu.show {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
-
+    
         .dropdown-item {
             display: block;
             padding: 12px 20px;
@@ -128,20 +140,20 @@
             transition: all 0.2s ease;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-
+    
         .dropdown-item:last-child {
             border-bottom: none;
         }
-
+    
         .dropdown-item:hover {
             background: rgba(255, 255, 255, 0.05);
             color: var(--text-main);
         }
-
+    
         .hidden {
             display: none !important;
         }
-
+    
         .footer-text {
             text-align: center;
             padding: 30px;
@@ -149,16 +161,19 @@
             color: rgba(148, 163, 184, 0.6);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             background: #0f172a;
+            width: 100%;
         }
-
+    
         /* Base content spacer to avoid overlap with absolute header */
         .base-content {
             margin-top: 80px;
             flex: 1;
             display: flex;
             flex-direction: column;
+            width: 100%;
+            max-width: 100%;
         }
-
+    
         /* Custom Global Modal */
         .global-modal-overlay {
             position: fixed;
@@ -174,12 +189,12 @@
             visibility: hidden;
             transition: all 0.3s ease;
         }
-
+    
         .global-modal-overlay.show {
             opacity: 1;
             visibility: visible;
         }
-
+    
         .global-modal-box {
             background: rgba(30, 41, 59, 0.95);
             border: 1px solid rgba(148, 163, 184, 0.2);
@@ -192,11 +207,11 @@
             transition: transform 0.3s ease;
             text-align: center;
         }
-
+    
         .global-modal-overlay.show .global-modal-box {
             transform: translateY(0);
         }
-
+    
         .global-modal-title {
             font-size: 1.4rem;
             font-weight: 700;
@@ -204,7 +219,7 @@
             margin-top: 0;
             margin-bottom: 15px;
         }
-
+    
         .global-modal-message {
             font-size: 1rem;
             color: #94a3b8;
@@ -212,13 +227,13 @@
             margin-bottom: 25px;
             white-space: pre-wrap;
         }
-
+    
         .global-modal-actions {
             display: flex;
             justify-content: center;
             gap: 15px;
         }
-
+    
         .global-modal-btn {
             padding: 10px 20px;
             border-radius: 8px;
@@ -228,26 +243,89 @@
             transition: all 0.2s ease;
             border: none;
         }
-
+    
         .global-modal-btn-cancel {
             background: rgba(148, 163, 184, 0.1);
             color: #f8fafc;
             border: 1px solid rgba(148, 163, 184, 0.3);
         }
-
+    
         .global-modal-btn-cancel:hover {
             background: rgba(148, 163, 184, 0.2);
         }
-
+    
         .global-modal-btn-confirm {
             background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
             color: #ffffff;
             box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.3);
         }
-
+    
         .global-modal-btn-confirm:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+        }
+    
+        /* --- REGRAS DE RESPONSIVIDADE (MEDIA QUERIES) CORRIGIDAS --- */
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 15px 20px;
+            }
+    
+            .header-left {
+                gap: 15px;
+            }
+    
+            .header-logo {
+                font-size: 1.25rem;
+            }
+    
+            .header-link {
+                font-size: 0.9rem;
+            }
+    
+            .base-content {
+                margin-top: 70px;
+            }
+        }
+    
+        /* Ajuste fino para telas como a 360x740 da imagem */
+        @media (max-width: 480px) {
+            .main-header {
+                padding: 12px 15px;
+            }
+    
+            .header-left {
+                gap: 12px;
+            }
+    
+            .header-logo {
+                font-size: 1.15rem;
+            }
+    
+            .header-link {
+                font-size: 0.85rem;
+            }
+    
+            .avatar-btn {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .avatar-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+    
+            .dropdown-menu {
+                top: 50px;
+                right: 0;
+                min-width: 150px;
+            }
+    
+            .footer-text {
+                padding: 20px;
+                font-size: 0.8rem;
+            }
         }
     </style>
     {% block extra_css %}{% endblock %}
@@ -292,7 +370,6 @@
         Transformando curiosidade em conhecimento.
     </footer>
 
-    <!-- Global Modal Overlay -->
     <div id="globalModalOverlay" class="global-modal-overlay">
         <div class="global-modal-box">
             <h3 id="globalModalTitle" class="global-modal-title">Aviso</h3>
@@ -392,7 +469,6 @@
                     e.preventDefault();
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('refresh_token');
-                    // Caso o usuário tente deslogar numa página protegida, redirecionar para login
                     window.location.href = '/login/';
                 });
             }
