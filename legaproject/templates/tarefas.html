@@ -104,10 +104,16 @@
         width: 100%;
     }
 
+    .task-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 5px;
+    }
+
     .task-title {
         font-weight: 600;
         color: #f8fafc;
-        margin-bottom: 5px;
         font-size: 1.15rem;
         transition: all 0.3s;
     }
@@ -132,6 +138,49 @@
         padding: 5px 10px;
         border-radius: 12px;
         font-weight: bold;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 4px 24px 4px 10px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        margin-left: 10px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        outline: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cbd5e1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px top 50%;
+        background-size: 8px auto;
+    }
+    
+    select.status-badge option {
+        background: #1e293b;
+        color: #f8fafc;
+    }
+
+    .status-concluido {
+        background: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-emandamento {
+        background: rgba(56, 189, 248, 0.2);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .status-pendente {
+        background: rgba(148, 163, 184, 0.2);
+        color: #cbd5e1;
+        border: 1px solid rgba(148, 163, 184, 0.3);
     }
 
     .badge-time {
@@ -263,7 +312,7 @@
     <div class="container">
         <div class="header">
             <h2>Minhas Tarefas</h2>
-            <a href="/" class="btn-back">← Voltar</a>
+            <a href="/trilhas/" class="btn-back">← Voltar</a>
         </div>
 
         <div id="loadingIndicator" class="loading-indicator">
@@ -303,7 +352,7 @@
                 const selectedOption = qaArea.querySelector(`input[name="taskOption_${taskId}"]:checked`);
                 
                 if (!selectedOption) {
-                    alert('Por favor, selecione uma resposta antes de confirmar!');
+                    await showModalAlert('Por favor, selecione uma resposta antes de confirmar!');
                     return;
                 }
 
@@ -328,21 +377,30 @@
                             // Marca tarefa como concluída
                             taskItem.classList.add('task-completed');
                             
-                            // Remove o formulário de perguntas e mostra mensagem de sucesso
-                            qaArea.innerHTML = `<div class="completed-badge">✓ Tarefa concluída com sucesso!</div>`;
+                            // Atualiza o status badge
+                            const statusBadge = taskItem.querySelector('.status-badge');
+                            if (statusBadge) {
+                                statusBadge.value = 'concluido';
+                                statusBadge.className = 'status-badge status-concluido';
+                            }
+                            
+                            const badgeDiv = document.getElementById(`qa-badge-${taskId}`);
+                            const formDiv = document.getElementById(`qa-form-${taskId}`);
+                            if (badgeDiv) badgeDiv.style.display = 'flex';
+                            if (formDiv) formDiv.style.display = 'none';
                         } else {
-                            alert('❌ ' + data.detail);
+                            await showModalAlert('❌ ' + data.detail, 'Erro');
                             btn.disabled = false;
                             btn.textContent = 'Responder';
                         }
                     } else {
-                        alert('Falha ao enviar resposta.');
+                        await showModalAlert('Falha ao enviar resposta.', 'Erro');
                         btn.disabled = false;
                         btn.textContent = 'Responder';
                     }
                 } catch (error) {
                     console.error(error);
-                    alert('Erro de conexão ao tentar responder.');
+                    await showModalAlert('Erro de conexão ao tentar responder.', 'Erro de Conexão');
                     btn.disabled = false;
                     btn.textContent = 'Responder';
                 }
@@ -350,8 +408,15 @@
         });
 
         // Função de busca
+        const urlParams = new URLSearchParams(window.location.search);
+        const roadmapId = urlParams.get('roadmap_id');
+        let fetchUrl = '/api/tarefas/';
+        if (roadmapId) {
+            fetchUrl += `?roadmap_id=${roadmapId}`;
+        }
+        
         try {
-            const response = await fetch('/api/tarefas/', {
+            const response = await fetch(fetchUrl, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
@@ -364,7 +429,7 @@
                 const modulos = await response.json();
                 
                 if (!modulos || modulos.length === 0) {
-                    resultArea.innerHTML = '<div class="empty-state">Nenhuma tarefa encontrada. Crie seu primeiro Roadmap na página inicial!</div>';
+                    resultArea.innerHTML = '<div class="empty-state">Nenhuma tarefa encontrada para esta trilha. Crie uma nova trilha na página de Trilhas!</div>';
                 } else {
                     renderModules(modulos);
                 }
@@ -372,7 +437,7 @@
                 resultArea.style.display = 'block';
                 
             } else if (response.status === 401 || response.status === 403) {
-                alert('Sua sessão expirou. Faça login novamente.');
+                await showModalAlert('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
                 localStorage.clear();
                 window.location.href = '/login/';
             } else {
@@ -389,6 +454,7 @@
         // Função de renderização DOM
         function renderModules(modulos) {
             resultArea.innerHTML = ''; 
+            let foundEmAndamento = false;
 
             modulos.forEach((modulo) => {
                 const moduleCard = document.createElement('div');
@@ -414,9 +480,99 @@
                         const taskContent = document.createElement('div');
                         taskContent.className = 'task-content';
 
+                        const taskHeaderRow = document.createElement('div');
+                        taskHeaderRow.className = 'task-header-row';
+
                         const taskTitle = document.createElement('div');
                         taskTitle.className = 'task-title';
                         taskTitle.textContent = tarefa.titulo;
+
+                        const statusSelect = document.createElement('select');
+                        statusSelect.className = 'status-badge';
+                        statusSelect.setAttribute('data-task-id', tarefa.id);
+                        
+                        const options = [
+                            { value: 'pendente', text: 'PENDENTE' },
+                            { value: 'em_andamento', text: 'EM ANDAMENTO' },
+                            { value: 'concluido', text: 'CONCLUÍDO' }
+                        ];
+                        
+                        let currentStatus = tarefa.status || 'pendente';
+                        if (!tarefa.status || tarefa.status === 'pendente') {
+                            if (tarefa.concluido) {
+                                currentStatus = 'concluido';
+                            } else if (!foundEmAndamento) {
+                                currentStatus = 'em_andamento';
+                                foundEmAndamento = true;
+                            }
+                        }
+
+                        options.forEach(opt => {
+                            const optionEl = document.createElement('option');
+                            optionEl.value = opt.value;
+                            optionEl.textContent = opt.text;
+                            if (opt.value === currentStatus) {
+                                optionEl.selected = true;
+                            }
+                            statusSelect.appendChild(optionEl);
+                        });
+
+                        function updateSelectColor(selectEl) {
+                            selectEl.className = 'status-badge';
+                            if (selectEl.value === 'concluido') {
+                                selectEl.classList.add('status-concluido');
+                            } else if (selectEl.value === 'em_andamento') {
+                                selectEl.classList.add('status-emandamento');
+                            } else {
+                                selectEl.classList.add('status-pendente');
+                            }
+                        }
+                        updateSelectColor(statusSelect);
+
+                        statusSelect.addEventListener('change', async function() {
+                            const newStatus = this.value;
+                            updateSelectColor(this);
+                            
+                            try {
+                                const response = await fetch(`/api/tarefas/${tarefa.id}/status/`, {
+                                    method: 'PATCH',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${accessToken}`,
+                                        'X-CSRFToken': '{{ csrf_token }}'
+                                    },
+                                    body: JSON.stringify({ status: newStatus })
+                                });
+                                
+                                const data = await response.json();
+                                if (response.status === 200) {
+                                    const badgeDiv = document.getElementById(`qa-badge-${tarefa.id}`);
+                                    const formDiv = document.getElementById(`qa-form-${tarefa.id}`);
+
+                                    if (newStatus === 'concluido') {
+                                        taskItem.classList.add('task-completed');
+                                        if (badgeDiv) badgeDiv.style.display = 'flex';
+                                        if (formDiv) formDiv.style.display = 'none';
+                                    } else {
+                                        taskItem.classList.remove('task-completed');
+                                        if (badgeDiv) badgeDiv.style.display = 'none';
+                                        if (formDiv && formDiv.children.length > 0) {
+                                            formDiv.style.display = 'block';
+                                            const qaArea = document.getElementById(`qa-area-${tarefa.id}`);
+                                            if (qaArea) qaArea.style.display = 'block';
+                                        }
+                                    }
+                                } else {
+                                    await showModalAlert('Falha ao atualizar status: ' + (data.detail || ''), 'Erro');
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                await showModalAlert('Erro de conexão ao atualizar status.', 'Erro de Conexão');
+                            }
+                        });
+
+                        taskHeaderRow.appendChild(taskTitle);
+                        taskHeaderRow.appendChild(statusSelect);
 
                         const taskDesc = document.createElement('div');
                         taskDesc.className = 'task-description';
@@ -436,7 +592,7 @@
                         diffBadge.textContent = `Dificuldade: ${pontos}/5`;
                         taskMeta.appendChild(diffBadge);
 
-                        taskContent.appendChild(taskTitle);
+                        taskContent.appendChild(taskHeaderRow);
                         if (tarefa.conteudo_exercicio) taskContent.appendChild(taskDesc);
                         taskContent.appendChild(taskMeta);
 
@@ -445,9 +601,15 @@
                         qaArea.className = 'task-qa-area';
                         qaArea.id = `qa-area-${tarefa.id}`;
 
-                        if (tarefa.concluido) {
-                            qaArea.innerHTML = `<div class="completed-badge">✓ Tarefa concluída com sucesso!</div>`;
-                        } else if (tarefa.pergunta && tarefa.opcoes && tarefa.opcoes.length > 0) {
+                        const badgeDiv = document.createElement('div');
+                        badgeDiv.className = 'completed-badge';
+                        badgeDiv.innerHTML = `✓ Tarefa concluída com sucesso! Atualize a página para ver a próxima tarefa.`;
+                        badgeDiv.id = `qa-badge-${tarefa.id}`;
+
+                        const formDiv = document.createElement('div');
+                        formDiv.id = `qa-form-${tarefa.id}`;
+
+                        if (tarefa.pergunta && tarefa.opcoes && tarefa.opcoes.length > 0) {
                             // Pergunta
                             const questionDiv = document.createElement('div');
                             questionDiv.className = 'qa-question';
@@ -478,9 +640,20 @@
                             btnSubmit.setAttribute('data-task-id', tarefa.id);
                             btnSubmit.textContent = 'Responder';
 
-                            qaArea.appendChild(questionDiv);
-                            qaArea.appendChild(optionsDiv);
-                            qaArea.appendChild(btnSubmit);
+                            formDiv.appendChild(questionDiv);
+                            formDiv.appendChild(optionsDiv);
+                            formDiv.appendChild(btnSubmit);
+                        }
+
+                        qaArea.appendChild(badgeDiv);
+                        qaArea.appendChild(formDiv);
+
+                        if (tarefa.concluido) {
+                            badgeDiv.style.display = 'flex';
+                            formDiv.style.display = 'none';
+                        } else if (tarefa.pergunta && tarefa.opcoes && tarefa.opcoes.length > 0) {
+                            badgeDiv.style.display = 'none';
+                            formDiv.style.display = 'block';
                         } else {
                             qaArea.style.display = 'none';
                         }

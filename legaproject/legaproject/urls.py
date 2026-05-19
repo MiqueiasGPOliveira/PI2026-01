@@ -26,6 +26,7 @@ urlpatterns = [
     path('perfil/', views.perfil_page, name='perfil_page'),
     path('tarefas/', views.tarefas_page, name='tarefas_page'),
     path('trilhas/', views.roadmaps_page, name='roadmaps_page'),
+    path('calendario/', views.calendario_page, name='calendario_page'),
     path('gerador-roadmap/', views.roadmap_page, name='roadmap_page'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),

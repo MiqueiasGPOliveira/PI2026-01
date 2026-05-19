@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 class TarefaSchema(BaseModel):
     titulo: str = Field(description="Título curto do exercício")
-    conteudo_exercicio: str = Field(description="O que o aluno deve fazer detalhadamente")
+    conteudo_exercicio: str = Field(description="Instruções diretas sobre o que estudar, fornecendo links ou nomes de sites/livros reais para obter o conhecimento (ex: 'Estude sobre assunto X, você pode ver o conteúdo no seguinte site: [link]')")
     tempo_estimado: int = Field(description="Tempo estimado em minutos")
     pontos_dificuldade: int = Field(description="Um número inteiro de 1 a 5 representando a dificuldade (1 = muito fácil, 5 = muito difícil)")
     pergunta: str = Field(description="Uma pergunta de múltipla escolha para validar se o aluno entendeu a tarefa")
@@ -26,8 +26,9 @@ class SocraticMentorService:
     SYSTEM_INSTRUCTION = (
         "Você é um Mentor educacional especializado em planejar trilhas de aprendizado (Roadmaps). "
         "Sua missão é gerar um plano de estudos detalhado, claro e estruturado, dividido em módulos lógicos, "
-        "com cada módulo contendo exercícios práticos. NÃO aja de forma socrática e não faça perguntas. "
+        "com cada módulo contendo tarefas. NÃO aja de forma socrática e não faça perguntas. "
         "Apenas construa o roteiro rigorosamente dentro da estrutura de dados solicitada. O tempo_estimado da tarefa deve caber no tempo total que o aluno solicitou. "
+        "ATENÇÃO: O 'conteudo_exercicio' deve APENAS descrever o que o usuário precisa fazer para OBTER o conhecimento, recomendando links reais, sites, vídeos ou livros específicos (ex: 'Estude sobre X no site Y: [link]'). "
         "Para CADA tarefa, crie uma 'pergunta' de múltipla escolha para testar o conhecimento do aluno sobre aquela tarefa, forneça 4 'opcoes' curtas e a 'resposta_correta' exata."
     )
     

@@ -109,6 +109,12 @@ class Tarefa(models.Model):
     modulo = models.ForeignKey(Modulo, on_delete=models.CASCADE, related_name='tarefas')
     titulo = models.CharField(max_length=255)
     conteudo_exercicio = models.TextField(blank=True, null=True)
+    STATUS_CHOICES = [
+        ('pendente', 'Pendente'),
+        ('em_andamento', 'Em Andamento'),
+        ('concluido', 'Concluído'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
     concluido = models.BooleanField(default=False)
     tempo_estimado = models.PositiveIntegerField(help_text="Em minutos")
     pontos_dificuldade = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
@@ -117,6 +123,8 @@ class Tarefa(models.Model):
     pergunta = models.TextField(blank=True, null=True, help_text="Pergunta para validação da tarefa")
     opcoes = models.JSONField(blank=True, null=True, help_text="Lista de opções de múltipla escolha")
     resposta_correta = models.CharField(max_length=255, blank=True, null=True, help_text="O texto exato da opção correta")
+
+    data_agendada = models.DateField(null=True, blank=True, help_text="Data agendada para realizar a tarefa")
 
     def __str__(self):
         return self.titulo

@@ -158,6 +158,97 @@
             display: flex;
             flex-direction: column;
         }
+
+        /* Custom Global Modal */
+        .global-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .global-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .global-modal-box {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .global-modal-overlay.show .global-modal-box {
+            transform: translateY(0);
+        }
+
+        .global-modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .global-modal-message {
+            font-size: 1rem;
+            color: #94a3b8;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            white-space: pre-wrap;
+        }
+
+        .global-modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .global-modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .global-modal-btn-cancel {
+            background: rgba(148, 163, 184, 0.1);
+            color: #f8fafc;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .global-modal-btn-cancel:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .global-modal-btn-confirm {
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.3);
+        }
+
+        .global-modal-btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -201,7 +292,68 @@
         Transformando curiosidade em conhecimento.
     </footer>
 
+    <!-- Global Modal Overlay -->
+    <div id="globalModalOverlay" class="global-modal-overlay">
+        <div class="global-modal-box">
+            <h3 id="globalModalTitle" class="global-modal-title">Aviso</h3>
+            <div id="globalModalMessage" class="global-modal-message">Mensagem</div>
+            <div class="global-modal-actions">
+                <button id="globalModalBtnCancel" class="global-modal-btn global-modal-btn-cancel hidden">Cancelar</button>
+                <button id="globalModalBtnConfirm" class="global-modal-btn global-modal-btn-confirm">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Global Modal API
+        window.showModalAlert = function(message, title = "Aviso") {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('globalModalOverlay');
+                document.getElementById('globalModalTitle').textContent = title;
+                document.getElementById('globalModalMessage').textContent = message;
+                
+                const btnCancel = document.getElementById('globalModalBtnCancel');
+                const btnConfirm = document.getElementById('globalModalBtnConfirm');
+                
+                btnCancel.classList.add('hidden'); // alert doesn't have cancel
+                btnConfirm.textContent = 'OK';
+                
+                btnConfirm.onclick = () => {
+                    overlay.classList.remove('show');
+                    resolve(true);
+                };
+                
+                overlay.classList.add('show');
+            });
+        };
+
+        window.showModalConfirm = function(message, title = "Confirmação") {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('globalModalOverlay');
+                document.getElementById('globalModalTitle').textContent = title;
+                document.getElementById('globalModalMessage').textContent = message;
+                
+                const btnCancel = document.getElementById('globalModalBtnCancel');
+                const btnConfirm = document.getElementById('globalModalBtnConfirm');
+                
+                btnCancel.classList.remove('hidden');
+                btnCancel.textContent = 'Cancelar';
+                btnConfirm.textContent = 'Confirmar';
+                
+                btnCancel.onclick = () => {
+                    overlay.classList.remove('show');
+                    resolve(false);
+                };
+                
+                btnConfirm.onclick = () => {
+                    overlay.classList.remove('show');
+                    resolve(true);
+                };
+                
+                overlay.classList.add('show');
+            });
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const avatarBtn = document.getElementById('avatar-btn');
             const dropdownMenu = document.getElementById('user-dropdown');

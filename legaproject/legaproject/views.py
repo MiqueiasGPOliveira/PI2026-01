@@ -47,3 +47,9 @@ def roadmaps_page(request):
     Renderiza a página de listar trilhas/roadmaps do usuário.
     """
     return render(request, 'roadmaps.html')
+
+def calendario_page(request):
+    """
+    Renderiza a página de calendário do Front-end.
+    """
+    return render(request, 'calendario.html')

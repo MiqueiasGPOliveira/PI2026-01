@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .serializers import RegisterSerializer, UserSerializer, MentorInteractSerializer, ModuloComTarefasSerializer, RoadmapSerializer
+from .serializers import RegisterSerializer, UserSerializer, MentorInteractSerializer, ModuloComTarefasSerializer, RoadmapSerializer, RoadmapComModulosSerializer, TarefaCreateSerializer
 from .services import SocraticMentorService
 from .models import Modulo, Tarefa, Roadmap
 from django.shortcuts import get_object_or_404
@@ -41,7 +41,8 @@ class UserProfileView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-from datetime import date
+from datetime import date, timedelta
+from django.utils import timezone
 
 class MentorInteractView(APIView):
     """
@@ -60,7 +61,20 @@ class MentorInteractView(APIView):
             nivel = serializer.validated_data.get('nivel')
             horas = serializer.validated_data.get('horas_diarias')
             formato = serializer.validated_data.get('formato')
+            periodo = serializer.validated_data.get('periodo_estudo')
             
+            # Mapeamento do tempo em string para inteiro (minutos)
+            horas_to_minutos = {
+                "10 minutos": 10,
+                "30 minutos": 30,
+                "1 hora": 60,
+                "1 hora e 30 minutos": 90,
+                "2 horas": 120,
+                "2 horas e 30 minutos": 150,
+                "3 horas": 180
+            }
+            minutos_por_dia = horas_to_minutos.get(horas, 60)
+
             # Recuperando informações protegidas do usuário autenticado
             user = request.user
             
@@ -84,7 +98,7 @@ class MentorInteractView(APIView):
                 f"O objetivo principal dele é: {objetivo}\n"
                 f"Assunto que deseja aprender: {assunto}\n"
                 f"Nível de conhecimento atual: {nivel}\n"
-                f"Prazo esperado: {tempo} estudando {horas} por dia.\n"
+                f"Prazo esperado: {tempo} estudando {horas} por dia, no período da {periodo}.\n"
                 f"Formato preferido de conteúdo: {formato}\n\n"
                 f"Por favor, estruture a resposta de forma clara, usando cabeçalhos, listas e negritos do Markdown."
             )
@@ -106,6 +120,9 @@ class MentorInteractView(APIView):
                     assunto=assunto
                 )
                 
+                current_date = timezone.now().date()
+                minutos_hoje = 0
+
                 # 2. Itera sobre os módulos
                 ordem_modulo = 1
                 for mod_data in dados_json.get('modulos', []):
@@ -118,15 +135,28 @@ class MentorInteractView(APIView):
                     
                     # 3. Itera sobre as tarefas
                     for t_data in mod_data.get('tarefas', []):
+                        try:
+                            tempo_estimado = int(t_data.get('tempo_estimado', 15))
+                        except (ValueError, TypeError):
+                            tempo_estimado = 15
+                        
+                        # Verifica se o tempo desta tarefa estoura o limite de hoje
+                        if minutos_hoje + tempo_estimado > minutos_por_dia and minutos_hoje > 0:
+                            current_date += timedelta(days=1)
+                            minutos_hoje = 0
+                            
+                        minutos_hoje += tempo_estimado
+
                         Tarefa.objects.create(
                             modulo=modulo,
                             titulo=t_data.get('titulo', 'Tarefa sem título'),
                             conteudo_exercicio=t_data.get('conteudo_exercicio', ''),
-                            tempo_estimado=t_data.get('tempo_estimado', 15),
+                            tempo_estimado=tempo_estimado,
                             pontos_dificuldade=t_data.get('pontos_dificuldade', 1),
                             pergunta=t_data.get('pergunta', ''),
                             opcoes=t_data.get('opcoes', []),
-                            resposta_correta=t_data.get('resposta_correta', '')
+                            resposta_correta=t_data.get('resposta_correta', ''),
+                            data_agendada=current_date
                         )
                 
                 return Response({
@@ -154,8 +184,11 @@ class TarefaListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Busca todos os módulos que pertencem aos roadmaps do usuário
-        modulos = Modulo.objects.filter(roadmap__user=request.user).order_by('ordem', 'id')
+        roadmap_id = request.query_params.get('roadmap_id')
+        if roadmap_id:
+            modulos = Modulo.objects.filter(roadmap__user=request.user, roadmap_id=roadmap_id).order_by('ordem', 'id')
+        else:
+            modulos = Modulo.objects.filter(roadmap__user=request.user).order_by('ordem', 'id')
         serializer = ModuloComTarefasSerializer(modulos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -174,15 +207,33 @@ class TarefaStatusUpdateView(APIView):
         if tarefa.modulo.roadmap.user != request.user:
             return Response({"detail": "Você não tem permissão para alterar esta tarefa."}, status=status.HTTP_403_FORBIDDEN)
         
-        # Verifica se o campo concluido foi enviado na requisição
+        # Verifica se o campo status ou concluido foi enviado na requisição
+        novo_status = request.data.get('status')
         concluido = request.data.get('concluido')
-        if concluido is not None:
-            # Garante que seja booleano
-            tarefa.concluido = bool(concluido)
-            tarefa.save()
-            return Response({"detail": "Status atualizado com sucesso.", "concluido": tarefa.concluido}, status=status.HTTP_200_OK)
         
-        return Response({"detail": "O campo 'concluido' é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
+        updated = False
+        if novo_status in dict(Tarefa.STATUS_CHOICES).keys():
+            tarefa.status = novo_status
+            if novo_status == 'concluido':
+                tarefa.concluido = True
+            else:
+                tarefa.concluido = False
+            updated = True
+            
+        elif concluido is not None:
+            tarefa.concluido = bool(concluido)
+            tarefa.status = 'concluido' if tarefa.concluido else 'pendente'
+            updated = True
+            
+        if updated:
+            tarefa.save()
+            return Response({
+                "detail": "Status atualizado com sucesso.", 
+                "concluido": tarefa.concluido,
+                "status": tarefa.status
+            }, status=status.HTTP_200_OK)
+        
+        return Response({"detail": "Status inválido ou não fornecido."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TarefaResponderView(APIView):
@@ -205,6 +256,7 @@ class TarefaResponderView(APIView):
             
         if resposta_usuario.strip().lower() == (tarefa.resposta_correta or "").strip().lower():
             tarefa.concluido = True
+            tarefa.status = 'concluido'
             tarefa.save()
             return Response({
                 "sucesso": True, 
@@ -229,3 +281,110 @@ class RoadmapListView(APIView):
         roadmaps = Roadmap.objects.filter(user=request.user).order_by('-criado_em')
         serializer = RoadmapSerializer(roadmaps, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class RoadmapDeleteView(APIView):
+    """
+    DELETE /api/roadmaps/<id>/
+    Exclui uma trilha de estudos.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+        roadmap = get_object_or_404(Roadmap, pk=pk)
+        
+        # Garante que a trilha pertence ao usuário logado
+        if roadmap.user != request.user:
+            return Response({"detail": "Você não tem permissão para excluir esta trilha."}, status=status.HTTP_403_FORBIDDEN)
+            
+        roadmap.delete()
+        return Response({"detail": "Trilha excluída com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+
+class CalendarioAPIView(APIView):
+    """
+    GET /api/calendario/
+    Retorna as tarefas formatadas para o FullCalendar.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        tarefas = Tarefa.objects.filter(modulo__roadmap__user=request.user, data_agendada__isnull=False)
+        eventos = []
+        for t in tarefas:
+            color = '#38bdf8' 
+            if t.concluido:
+                color = '#4ade80'
+            
+            eventos.append({
+                'id': t.id,
+                'title': t.titulo,
+                'start': t.data_agendada.strftime('%Y-%m-%d'),
+                'color': color,
+                'extendedProps': {
+                    'status': t.status,
+                    'modulo': t.modulo.nome_modulo,
+                    'roadmap_id': t.modulo.roadmap.id
+                }
+            })
+        return Response(eventos, status=status.HTTP_200_OK)
+
+class TarefaRescheduleView(APIView):
+    """
+    PATCH /api/tarefas/<int:pk>/agendar/
+    Atualiza a data_agendada da tarefa.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            tarefa = Tarefa.objects.get(pk=pk, modulo__roadmap__user=request.user)
+        except Tarefa.DoesNotExist:
+            return Response({"detail": "Tarefa não encontrada ou não pertence a você."}, status=status.HTTP_404_NOT_FOUND)
+
+        nova_data_str = request.data.get('data_agendada')
+        if not nova_data_str:
+            return Response({"detail": "Data agendada não fornecida."}, status=status.HTTP_400_BAD_REQUEST)
+
+        from datetime import datetime
+        try:
+            # Fullcalendar often sends YYYY-MM-DD
+            # We can parse the first 10 characters just to be safe if ISO 8601 is sent
+            nova_data_str = nova_data_str[:10]
+            nova_data = datetime.strptime(nova_data_str, '%Y-%m-%d').date()
+            tarefa.data_agendada = nova_data
+            tarefa.save()
+            return Response({"detail": "Data da tarefa atualizada com sucesso.", "data_agendada": nova_data_str}, status=status.HTTP_200_OK)
+        except ValueError:
+             return Response({"detail": "Formato de data inválido. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+class RoadmapOpcoesView(APIView):
+    """
+    GET /api/roadmaps/opcoes/
+    Retorna os roadmaps e seus módulos para preencher selects.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        roadmaps = Roadmap.objects.filter(user=request.user).order_by('-criado_em')
+        serializer = RoadmapComModulosSerializer(roadmaps, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class TarefaCreateView(APIView):
+    """
+    POST /api/tarefas/criar/
+    Cria uma nova tarefa associada a um módulo.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = TarefaCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            modulo = serializer.validated_data['modulo']
+            if modulo.roadmap.user != request.user:
+                return Response({"detail": "Você não tem permissão para adicionar tarefas a esta trilha."}, status=status.HTTP_403_FORBIDDEN)
+            
+            tarefa = serializer.save(
+                conteudo_exercicio=request.data.get('conteudo_exercicio', 'Tarefa criada manualmente pelo usuário.'),
+                pergunta=request.data.get('pergunta', '')
+            )
+            return Response({"detail": "Tarefa criada com sucesso.", "id": tarefa.id}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

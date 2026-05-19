@@ -54,12 +54,13 @@ class MentorInteractSerializer(serializers.Serializer):
     nivel = serializers.CharField(required=True)
     horas_diarias = serializers.CharField(required=True)
     formato = serializers.CharField(required=True)
+    periodo_estudo = serializers.CharField(required=True)
 
 
 class TarefaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tarefa
-        fields = ['id', 'titulo', 'conteudo_exercicio', 'concluido', 'tempo_estimado', 'pontos_dificuldade', 'pergunta', 'opcoes']
+        fields = ['id', 'titulo', 'conteudo_exercicio', 'status', 'concluido', 'tempo_estimado', 'pontos_dificuldade', 'pergunta', 'opcoes']
 
 class ModuloComTarefasSerializer(serializers.ModelSerializer):
     tarefas = TarefaSerializer(many=True, read_only=True)
@@ -69,6 +70,32 @@ class ModuloComTarefasSerializer(serializers.ModelSerializer):
         fields = ['id', 'nome_modulo', 'ordem', 'tarefas']
 
 class RoadmapSerializer(serializers.ModelSerializer):
+    modulos_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Roadmap
-        fields = ['id', 'assunto', 'criado_em']
+        fields = ['id', 'assunto', 'criado_em', 'modulos_count']
+        
+    def get_modulos_count(self, obj):
+        return obj.modulos.count()
+
+class ModuloSimplesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Modulo
+        fields = ['id', 'nome_modulo']
+
+class RoadmapComModulosSerializer(serializers.ModelSerializer):
+    modulos = ModuloSimplesSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Roadmap
+        fields = ['id', 'assunto', 'modulos']
+
+class TarefaCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tarefa
+        fields = ['modulo', 'titulo', 'data_agendada', 'tempo_estimado', 'pontos_dificuldade', 'conteudo_exercicio', 'pergunta']
+        extra_kwargs = {
+            'conteudo_exercicio': {'required': False, 'allow_blank': True},
+            'pergunta': {'required': False, 'allow_blank': True}
+        }

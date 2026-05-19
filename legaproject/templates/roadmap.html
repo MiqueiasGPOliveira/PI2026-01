@@ -206,6 +206,16 @@
                         <option value="3 horas">3 horas</option>
                     </select>
                 </div>
+                
+                <div class="form-group">
+                    <label for="periodo_estudo">Em qual período do dia você irá estudar?</label>
+                    <select id="periodo_estudo" required>
+                        <option value="">Selecione...</option>
+                        <option value="Manhã">Manhã</option>
+                        <option value="Tarde">Tarde</option>
+                        <option value="Noite">Noite</option>
+                    </select>
+                </div>
 
                 <div class="form-group">
                     <label for="nivel">Seu nível atual no assunto:</label>
@@ -268,7 +278,8 @@
                 tempo_pretendido: document.getElementById('tempo_pretendido').value,
                 horas_diarias: document.getElementById('horas_diarias').value,
                 nivel: document.getElementById('nivel').value,
-                formato: document.getElementById('formato').value
+                formato: document.getElementById('formato').value,
+                periodo_estudo: document.getElementById('periodo_estudo').value
             };
 
             // Trava form e mostra loading
@@ -291,21 +302,19 @@
                 });
 
                 if (response.status === 200) {
-                    const data = await response.json();
-                    alert('Trilha gerada e salva com sucesso!');
+                    await showModalAlert('Trilha gerada e salva com sucesso!', 'Sucesso');
                     window.location.href = '/trilhas/';
                     
                 } else if (response.status === 401 || response.status === 403) {
-                    alert('Sua sessão expirou. Faça login novamente.');
-                    localStorage.clear();
+                    await showModalAlert('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
                     window.location.href = '/login/';
                 } else {
                     const errData = await response.json();
-                    alert(`Erro da API: ${errData.error || 'Falha ao processar.'}`);
+                    await showModalAlert(`Erro da API: ${errData.error || 'Falha ao processar.'}`, 'Erro');
                 }
             } catch (error) {
-                console.error('Erro na geração do roadmap:', error);
-                alert('Erro de conexão com o servidor. Tente novamente mais tarde.');
+                console.error('Erro na requisição:', error);
+                await showModalAlert('Erro de conexão com o servidor. Tente novamente mais tarde.', 'Erro de Conexão');
             } finally {
                 btnGenerate.disabled = false;
                 loadingIndicator.style.display = 'none';
