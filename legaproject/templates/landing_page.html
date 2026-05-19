@@ -186,7 +186,7 @@
         transform: translateY(-5px);
         background: rgba(30, 41, 59, 0.9);
         border-color: var(--primary);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
     }
 
     .dash-icon {
@@ -215,7 +215,8 @@
         margin: 0;
     }
 
-    h1, p {
+    h1,
+    p {
         margin: 0;
     }
 </style>
@@ -271,29 +272,25 @@
     <section class="dashboard-section">
         <h2 class="dashboard-title">Painel de Aprendizagem</h2>
         <div class="dashboard-grid">
-            
+
             <a href="{% url 'roadmap_page' %}" class="dash-card">
                 <div class="dash-icon">🗺️</div>
                 <h3 class="dash-title">Criar Roadmap</h3>
-                <p class="dash-desc">Inicie uma nova trilha de conhecimento personalizada. Utilize nossa IA para guiar seus estudos através do método socrático e aprendizagem ativa.</p>
+                <p class="dash-desc">Inicie uma nova trilha de conhecimento personalizada. Utilize nossa IA para guiar
+                    seus estudos através do método socrático e aprendizagem ativa.</p>
             </a>
 
             <a href="{% url 'roadmaps_page' %}" class="dash-card">
                 <div class="dash-icon">📚</div>
                 <h3 class="dash-title">Trilhas</h3>
-                <p class="dash-desc">Acesse suas trilhas de estudo geradas, acompanhe seu progresso e realize suas tarefas.</p>
+                <p class="dash-desc">Acesse suas trilhas de estudo geradas, acompanhe seu progresso e realize suas
+                    tarefas.</p>
             </a>
 
             <a href="/calendario" class="dash-card">
                 <div class="dash-icon">📅</div>
                 <h3 class="dash-title">Calendário</h3>
                 <p class="dash-desc">Visualize seus horários, sessões de estudo programadas e prazos importantes.</p>
-            </a>
-
-            <a href="/comunidade" class="dash-card">
-                <div class="dash-icon">👥</div>
-                <h3 class="dash-title">Comunidade</h3>
-                <p class="dash-desc">Conecte-se com outros estudantes, troque conhecimentos e participe de fóruns.</p>
             </a>
 
             <a href="{% url 'perfil_page' %}" class="dash-card">
