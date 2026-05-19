@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class UserManager(BaseUserManager):
     """
@@ -86,3 +87,36 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.nome_completo} ({self.usuario})"
+
+
+class Roadmap(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='roadmaps')
+    assunto = models.CharField(max_length=255)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Roadmap de {self.user.usuario} - {self.assunto}"
+
+class Modulo(models.Model):
+    roadmap = models.ForeignKey(Roadmap, on_delete=models.CASCADE, related_name='modulos')
+    nome_modulo = models.CharField(max_length=255)
+    ordem = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.nome_modulo
+
+class Tarefa(models.Model):
+    modulo = models.ForeignKey(Modulo, on_delete=models.CASCADE, related_name='tarefas')
+    titulo = models.CharField(max_length=255)
+    conteudo_exercicio = models.TextField(blank=True, null=True)
+    concluido = models.BooleanField(default=False)
+    tempo_estimado = models.PositiveIntegerField(help_text="Em minutos")
+    pontos_dificuldade = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    
+    # Campos de Validação (Q&A)
+    pergunta = models.TextField(blank=True, null=True, help_text="Pergunta para validação da tarefa")
+    opcoes = models.JSONField(blank=True, null=True, help_text="Lista de opções de múltipla escolha")
+    resposta_correta = models.CharField(max_length=255, blank=True, null=True, help_text="O texto exato da opção correta")
+
+    def __str__(self):
+        return self.titulo

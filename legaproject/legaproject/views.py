@@ -29,3 +29,21 @@ def roadmap_page(request):
     Renderiza a página de gerador de roadmap educacional.
     """
     return render(request, 'roadmap.html')
+
+def sobre_page(request):
+    """
+    Renderiza a página Sobre o projeto Mentor.
+    """
+    return render(request, 'sobre.html')
+
+def tarefas_page(request):
+    """
+    Renderiza a página de listar tarefas do usuário.
+    """
+    return render(request, 'tarefas.html')
+
+def roadmaps_page(request):
+    """
+    Renderiza a página de listar trilhas/roadmaps do usuário.
+    """
+    return render(request, 'roadmaps.html')

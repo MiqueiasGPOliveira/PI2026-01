@@ -1,127 +1,333 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mentor - Trilhas de Aprendizado</title>
-    <!-- Importação da Fonte Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --secondary: #a855f7;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+{% block title %}Mentor - Trilhas de Aprendizado{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        text-align: center;
+        position: relative;
+    }
+
+    .hero-content {
+        max-width: 900px;
+        margin: 0 auto;
+        z-index: 2;
+    }
+
+    .hero-title {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 800;
+        margin-bottom: 24px;
+        background: linear-gradient(to right, #f8fafc, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1.1rem, 2vw, 1.25rem);
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 40px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .cta-button {
+        font-size: 1.1rem;
+        padding: 16px 40px;
+        border-radius: 50px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        display: inline-block;
+        text-decoration: none;
+        font-weight: 600;
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .cta-button:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(99, 102, 241, 0.6);
+        color: white;
+    }
+
+    /* Benefits Section */
+    .benefits-section {
+        padding: 100px 20px 120px;
+        background: rgba(15, 23, 42, 0.4);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+    }
+
+    .benefits-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 40px;
+        margin-bottom: 80px;
+    }
+
+    .benefit-card {
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 40px 35px;
+        border-radius: 24px;
+        text-align: left;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .benefit-card:hover {
+        transform: translateY(-10px);
+        background: rgba(30, 41, 59, 0.8);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        border-color: rgba(99, 102, 241, 0.5);
+    }
+
+    .benefit-icon {
+        font-size: 3rem;
+        margin-bottom: 25px;
+        display: inline-block;
+        background: rgba(99, 102, 241, 0.1);
+        padding: 15px;
+        border-radius: 16px;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .benefit-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 16px;
+        letter-spacing: -0.01em;
+        margin-top: 0;
+    }
+
+    .benefit-text {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .cta-bottom {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    /* Dashboard Section (Logado) */
+    .dashboard-section {
+        padding: 60px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: calc(100vh - 80px);
+    }
+
+    .dashboard-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 40px;
+        background: linear-gradient(to right, #f8fafc, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        width: 100%;
+    }
+
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            text-align: center;
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
         }
+    }
 
-        .container {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 50px 40px;
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 450px;
-            margin: 20px;
-        }
+    .dash-card {
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        border-radius: 20px;
+        text-align: left;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+    }
 
+    .dash-card:hover {
+        transform: translateY(-5px);
+        background: rgba(30, 41, 59, 0.9);
+        border-color: var(--primary);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
 
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    .dash-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        display: inline-flex;
+        padding: 15px;
+        border-radius: 14px;
+        align-self: flex-start;
+    }
 
-        p {
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 35px;
-            font-size: 1.1rem;
-        }
+    .dash-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 10px;
+        margin-top: 0;
+    }
 
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+    .dash-desc {
+        color: var(--text-muted);
+        font-size: 1rem;
+        line-height: 1.5;
+        flex-grow: 1;
+        margin: 0;
+    }
 
-        .btn {
-            padding: 14px 25px;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-        }
+    h1, p {
+        margin: 0;
+    }
+</style>
+{% endblock %}
 
-        /* Botão Principal com Gradiente */
-        .btn-primary {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
+{% block content %}
+<!-- Visão de Visitante (Deslogado) -->
+<div id="guest-view">
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Bem-vindo ao Mentor:<br> A sua Inteligência Artificial para a Aprendizagem Ativa.
+            </h1>
+            <p class="hero-subtitle">O Mentor não é apenas mais um chat. Ele é um sistema de trilhas de conhecimento
+                mediado por IA que atua como o seu tutor socrático pessoal. Nossa missão é guiar você na construção
+                do seu próprio conhecimento, ajudando a desenvolver o seu pensamento crítico.</p>
+            <br><br>
+            <a href="{% url 'login_page' %}" class="cta-button">comece sua jornada de aprendizado</a>
+        </div>
+    </section>
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        }
+    <section class="benefits-section">
+        <div class="benefits-container">
+            <article class="benefit-card">
+                <div class="benefit-icon">🧠</div>
+                <h3 class="benefit-title">Fim da Dívida Cognitiva</h3>
+                <p class="benefit-text">Chega de delegar o seu raciocínio. O Mentor te ajuda a reter informações de
+                    verdade, sem depender de respostas prontas.</p>
+            </article>
 
-        /* Botão Secundário Transparente */
-        .btn-outline {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+            <article class="benefit-card">
+                <div class="benefit-icon">🎯</div>
+                <h3 class="benefit-title">Trilhas Personalizadas</h3>
+                <p class="benefit-text">Estude no seu ritmo com questionamentos reflexivos e direcionados exatamente
+                    para o que você precisa aprender.</p>
+            </article>
 
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Rodapé sutil */
-        .footer-text {
-            margin-top: 30px;
-            font-size: 0.8rem;
-            color: rgba(148, 163, 184, 0.5);
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-        <h1>Bem-vindo ao Mentor</h1>
-        <p>Sua jornada de aprendizado personalizada começa aqui. Deixe nossa IA guiar seus estudos.</p>
-
-        <div class="button-group">
-            <a href="{% url 'login_page' %}" class="btn btn-primary">Entrar na Plataforma</a>
-            <a href="{% url 'cadastro_page' %}" class="btn btn-outline">Criar Nova Conta</a>
+            <article class="benefit-card">
+                <div class="benefit-icon">⚡</div>
+                <h3 class="benefit-title">Aprendizagem Ativa</h3>
+                <p class="benefit-text">O método socrático garante que você seja o protagonista do seu
+                    desenvolvimento acadêmico e profissional.</p>
+            </article>
         </div>
 
-        <div class="footer-text">
-            Transformando curiosidade em conhecimento.
+        <div class="cta-bottom">
+            <a href="{% url 'login_page' %}" class="cta-button">comece sua jornada de aprendizado</a>
         </div>
-    </div>
+    </section>
+</div>
 
-</body>
+<!-- Visão de Dashboard (Logado) -->
+<div id="logged-in-view" class="hidden">
+    <section class="dashboard-section">
+        <h2 class="dashboard-title">Painel de Aprendizagem</h2>
+        <div class="dashboard-grid">
+            
+            <a href="{% url 'roadmap_page' %}" class="dash-card">
+                <div class="dash-icon">🗺️</div>
+                <h3 class="dash-title">Criar Roadmap</h3>
+                <p class="dash-desc">Inicie uma nova trilha de conhecimento personalizada. Utilize nossa IA para guiar seus estudos através do método socrático e aprendizagem ativa.</p>
+            </a>
 
-</html>
+            <a href="/tarefas" class="dash-card">
+                <div class="dash-icon">✅</div>
+                <h3 class="dash-title">Tarefas</h3>
+                <p class="dash-desc">Gerencie suas atividades diárias e mantenha seu progresso nos estudos em dia.</p>
+            </a>
+
+            <a href="/calendario" class="dash-card">
+                <div class="dash-icon">📅</div>
+                <h3 class="dash-title">Calendário</h3>
+                <p class="dash-desc">Visualize seus horários, sessões de estudo programadas e prazos importantes.</p>
+            </a>
+
+            <a href="/comunidade" class="dash-card">
+                <div class="dash-icon">👥</div>
+                <h3 class="dash-title">Comunidade</h3>
+                <p class="dash-desc">Conecte-se com outros estudantes, troque conhecimentos e participe de fóruns.</p>
+            </a>
+
+            <a href="{% url 'perfil_page' %}" class="dash-card">
+                <div class="dash-icon">👤</div>
+                <h3 class="dash-title">Perfil</h3>
+                <p class="dash-desc">Visualize e edite seus dados pessoais, formação e área de atuação.</p>
+            </a>
+
+            <a href="/configuracoes" class="dash-card">
+                <div class="dash-icon">⚙️</div>
+                <h3 class="dash-title">Configurações</h3>
+                <p class="dash-desc">Ajuste suas preferências de sistema, notificações e privacidade.</p>
+            </a>
+
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('access_token');
+        const guestView = document.getElementById('guest-view');
+        const loggedInView = document.getElementById('logged-in-view');
+
+        // Renderiza o Dashboard apenas se estiver autenticado
+        if (token) {
+            guestView.classList.add('hidden');
+            loggedInView.classList.remove('hidden');
+        } else {
+            guestView.classList.remove('hidden');
+            loggedInView.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

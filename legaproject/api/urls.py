@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import RegisterView, UserProfileView, MentorInteractView
+from .views import RegisterView, UserProfileView, MentorInteractView, TarefaListView, TarefaStatusUpdateView, RoadmapListView, TarefaResponderView
 
 urlpatterns = [
     # Auth
@@ -13,4 +13,12 @@ urlpatterns = [
     
     # IA Mentor
     path('mentor/interagir', MentorInteractView.as_view(), name='mentor_interact'),
+    
+    # Tarefas
+    path('tarefas/', TarefaListView.as_view(), name='tarefas-list'),
+    path('tarefas/<int:pk>/status/', TarefaStatusUpdateView.as_view(), name='tarefas-update-status'),
+    path('tarefas/<int:pk>/responder/', TarefaResponderView.as_view(), name='tarefas-responder'),
+
+    # Roadmaps (Trilhas)
+    path('roadmaps/', RoadmapListView.as_view(), name='roadmaps-list'),
 ]

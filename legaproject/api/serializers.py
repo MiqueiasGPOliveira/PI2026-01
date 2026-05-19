@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-
+from .models import Roadmap, Modulo, Tarefa
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
@@ -54,3 +54,21 @@ class MentorInteractSerializer(serializers.Serializer):
     nivel = serializers.CharField(required=True)
     horas_diarias = serializers.CharField(required=True)
     formato = serializers.CharField(required=True)
+
+
+class TarefaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tarefa
+        fields = ['id', 'titulo', 'conteudo_exercicio', 'concluido', 'tempo_estimado', 'pontos_dificuldade', 'pergunta', 'opcoes']
+
+class ModuloComTarefasSerializer(serializers.ModelSerializer):
+    tarefas = TarefaSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Modulo
+        fields = ['id', 'nome_modulo', 'ordem', 'tarefas']
+
+class RoadmapSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Roadmap
+        fields = ['id', 'assunto', 'criado_em']

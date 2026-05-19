@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Minhas Trilhas - Mentor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .roadmaps-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        flex: 1;
+        padding: 40px 20px;
+        min-height: calc(100vh - 180px);
+    }
+
+    .container {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 900px;
+        margin: 20px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .header h2 {
+        margin: 0;
+        color: #38bdf8;
+        font-size: 1.8rem;
+        letter-spacing: -0.025em;
+    }
+
+    .btn-create {
+        text-decoration: none;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        border-radius: 8px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px 0 rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .roadmap-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .roadmap-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: block;
+    }
+
+    .roadmap-card:hover {
+        border-color: rgba(56, 189, 248, 0.4);
+        background: rgba(15, 23, 42, 0.8);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .roadmap-title {
+        color: #f8fafc;
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .roadmap-date {
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+    .loading-indicator {
+        text-align: center;
+        color: #38bdf8;
+        font-size: 1rem;
+        font-style: italic;
+        margin-top: 20px;
+        padding: 20px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        color: #94a3b8;
+        padding: 40px 20px;
+        font-size: 1.1rem;
+        grid-column: 1 / -1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="roadmaps-wrapper">
+    <div class="container">
+        <div class="header">
+            <h2>Minhas Trilhas de Estudo</h2>
+            <a href="{% url 'roadmap_page' %}" class="btn-create">+ Criar Nova Trilha</a>
+        </div>
+
+        <div id="loadingIndicator" class="loading-indicator">
+            Buscando suas trilhas... Aguarde.
+        </div>
+
+        <div id="resultArea" class="roadmap-list" style="display: none;">
+            <!-- Os cards dos roadmaps renderizados virão aqui -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', async function () {
+        const accessToken = localStorage.getItem('access_token');
+        if (!accessToken) {
+            window.location.href = '/login/';
+            return;
+        }
+
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultArea = document.getElementById('resultArea');
+
+        try {
+            const response = await fetch('/api/roadmaps/', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            loadingIndicator.style.display = 'none';
+
+            if (response.status === 200) {
+                const roadmaps = await response.json();
+                
+                if (!roadmaps || roadmaps.length === 0) {
+                    resultArea.innerHTML = `
+                        <div class="empty-state">
+                            Você ainda não gerou nenhuma trilha de estudos.<br><br>
+                            Clique no botão verde acima para criar a sua primeira Trilha personalizada com nossa IA!
+                        </div>`;
+                } else {
+                    renderRoadmaps(roadmaps);
+                }
+                
+                resultArea.style.display = 'grid';
+                
+            } else if (response.status === 401 || response.status === 403) {
+                alert('Sua sessão expirou. Faça login novamente.');
+                localStorage.clear();
+                window.location.href = '/login/';
+            } else {
+                resultArea.innerHTML = '<div class="empty-state">Ocorreu um erro ao buscar as trilhas.</div>';
+                resultArea.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Erro ao buscar roadmaps:', error);
+            loadingIndicator.style.display = 'none';
+            resultArea.innerHTML = '<div class="empty-state">Erro de conexão com o servidor.</div>';
+            resultArea.style.display = 'block';
+        }
+
+        function renderRoadmaps(roadmaps) {
+            resultArea.innerHTML = ''; 
+
+            roadmaps.forEach((roadmap) => {
+                const card = document.createElement('a');
+                // Temporariamente leva para /tarefas/ onde todas as tarefas são renderizadas.
+                // Quando você quiser, no futuro poderemos filtrar tarefas só do roadmap clicado (ex: /tarefas/?roadmap_id=X)
+                card.href = '/tarefas/'; 
+                card.className = 'roadmap-card';
+
+                const title = document.createElement('div');
+                title.className = 'roadmap-title';
+                title.textContent = roadmap.assunto || 'Trilha de Estudo';
+
+                const data = new Date(roadmap.criado_em);
+                const dateStr = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                
+                const dateElem = document.createElement('div');
+                dateElem.className = 'roadmap-date';
+                dateElem.textContent = `Criado em: ${dateStr}`;
+
+                card.appendChild(title);
+                card.appendChild(dateElem);
+                
+                resultArea.appendChild(card);
+            });
+        }
+    });
+</script>
+{% endblock %}

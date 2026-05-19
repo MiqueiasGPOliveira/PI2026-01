@@ -1,107 +1,106 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Mentor</title>
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
+{% block title %}Cadastro - Mentor{% endblock %}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
+{% block extra_css %}
+<style>
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        padding: 40px 20px;
+        min-height: calc(100vh - 180px); /* Account for header and footer */
+    }
 
-        .container {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 400px;
-        }
+    .container {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 400px;
+    }
 
-        h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 30px;
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-        }
+    h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        background: linear-gradient(to right, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+    }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+    .form-group {
+        margin-bottom: 20px;
+    }
 
-        .form-group label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            display: block;
-        }
+    .form-group label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        display: block;
+    }
 
-        .form-group input {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
+    .form-group input {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        width: 100%;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
 
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
-            cursor: pointer;
-        }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+        cursor: pointer;
+    }
 
-        .btn {
-            background: var(--primary);
-            background: linear-gradient(to right, #6366f1, #a855f7);
-            color: white;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
+    .btn {
+        background: var(--primary);
+        background: linear-gradient(to right, #6366f1, #a855f7);
+        color: white;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
 
-        .btn:hover {
-            transform: translateY(-1px);
-            opacity: 0.9;
-        }
-    </style>
-</head>
+    .btn:hover {
+        transform: translateY(-1px);
+        opacity: 0.9;
+    }
 
-<body>
+    .error-message {
+        color: #f87171;
+        background: rgba(248, 113, 113, 0.1);
+        border: 1px solid rgba(248, 113, 113, 0.2);
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-size: 0.9rem;
+        display: none;
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}
 
+{% block content %}
+<div class="auth-wrapper">
     <div class="container">
         <h2>Criar Conta</h2>
         <form id="cadastroForm">
@@ -153,73 +152,74 @@
             <div id="errorMessage" class="error-message"></div>
         </form>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        document.getElementById('cadastroForm').addEventListener('submit', async function (event) {
-            // Evita o comportamento padrão do POST do HTML
-            event.preventDefault();
+{% block extra_js %}
+<script>
+    document.getElementById('cadastroForm').addEventListener('submit', async function (event) {
+        // Evita o comportamento padrão do POST do HTML
+        event.preventDefault();
 
-            const form = event.target;
-            const errorMessageDiv = document.getElementById('errorMessage');
-            errorMessageDiv.style.display = 'none'; // Esconde o erro antes de tentar
-            errorMessageDiv.innerHTML = ''; // Limpa mensagens anteriores
+        const form = event.target;
+        const errorMessageDiv = document.getElementById('errorMessage');
+        errorMessageDiv.style.display = 'none'; // Esconde o erro antes de tentar
+        errorMessageDiv.innerHTML = ''; // Limpa mensagens anteriores
 
-            // Extraindo o CSRF Token
-            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+        // Extraindo o CSRF Token
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
 
-            // Montando o payload JSON com os dados completos e com os nomes em português
-            const data = {
-                nome_completo: form.nome_completo.value,
-                usuario: form.usuario.value,
-                email: form.email.value,
-                senha: form.senha.value,
-                dt_nasc: form.dt_nasc.value,
-                telefone: form.telefone.value,
-                instituicao: form.instituicao.value,
-                area_atuacao: form.area_atuacao.value
-            };
+        // Montando o payload JSON com os dados completos e com os nomes em português
+        const data = {
+            nome_completo: form.nome_completo.value,
+            usuario: form.usuario.value,
+            email: form.email.value,
+            senha: form.senha.value,
+            dt_nasc: form.dt_nasc.value,
+            telefone: form.telefone.value,
+            instituicao: form.instituicao.value,
+            area_atuacao: form.area_atuacao.value
+        };
 
-            try {
-                // Fetch para a API
-                const response = await fetch("/api/auth/cadastro", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify(data)
-                });
+        try {
+            // Fetch para a API
+            const response = await fetch("/api/auth/cadastro", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(data)
+            });
 
-                if (response.status === 200 || response.status === 201) {
-                    // Redireciona para o login em caso de sucesso
-                    window.location.href = '/login'; // Adicionada a barra para evitar 301
-                } else {
-                    // Tratamento de Erros de Validação da API
-                    const errorData = await response.json();
-                    let errorMessages = [];
+            if (response.status === 200 || response.status === 201) {
+                // Redireciona para o login em caso de sucesso
+                window.location.href = '/login/'; // Adicionada a barra para evitar 301
+            } else {
+                // Tratamento de Erros de Validação da API
+                const errorData = await response.json();
+                let errorMessages = [];
 
-                    // Tratamento customizado para campos únicos usando as novas chaves
-                    if (errorData.usuario) errorMessages.push(`<strong>Usuário:</strong> Este apelido já está em uso.`);
-                    if (errorData.email) errorMessages.push(`<strong>E-mail:</strong> Este e-mail já está cadastrado.`);
-                    if (errorData.telefone) errorMessages.push(`<strong>Telefone:</strong> Este telefone já está cadastrado.`);
+                // Tratamento customizado para campos únicos usando as novas chaves
+                if (errorData.usuario) errorMessages.push(`<strong>Usuário:</strong> Este apelido já está em uso.`);
+                if (errorData.email) errorMessages.push(`<strong>E-mail:</strong> Este e-mail já está cadastrado.`);
+                if (errorData.telefone) errorMessages.push(`<strong>Telefone:</strong> Este telefone já está cadastrado.`);
 
-                    // Adiciona os outros erros que podem vir
-                    for (const key in errorData) {
-                        if (errorData.hasOwnProperty(key) && !['usuario', 'email', 'telefone'].includes(key)) {
-                            errorMessages.push(`<strong>${key}:</strong> ${errorData[key]}`);
-                        }
+                // Adiciona os outros erros que podem vir
+                for (const key in errorData) {
+                    if (errorData.hasOwnProperty(key) && !['usuario', 'email', 'telefone'].includes(key)) {
+                        errorMessages.push(`<strong>${key}:</strong> ${errorData[key]}`);
                     }
-
-                    errorMessageDiv.innerHTML = errorMessages.join('<br>');
-                    errorMessageDiv.style.display = 'block'; // Mostra a div de erro
                 }
-            } catch (error) {
-                console.error("Erro na requisição:", error);
-                errorMessageDiv.innerHTML = "Ocorreu um erro inesperado ao conectar com o servidor. Verifique sua conexão e tente novamente.";
-                errorMessageDiv.style.display = 'block';
-            }
-        });
-    </script>
-</body>
 
-</html>
+                errorMessageDiv.innerHTML = errorMessages.join('<br>');
+                errorMessageDiv.style.display = 'block'; // Mostra a div de erro
+            }
+        } catch (error) {
+            console.error("Erro na requisição:", error);
+            errorMessageDiv.innerHTML = "Ocorreu um erro inesperado ao conectar com o servidor. Verifique sua conexão e tente novamente.";
+            errorMessageDiv.style.display = 'block';
+        }
+    });
+</script>
+{% endblock %}

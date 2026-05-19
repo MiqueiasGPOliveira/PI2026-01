@@ -1,6 +1,22 @@
 from google import genai
 from django.conf import settings
+from pydantic import BaseModel, Field
 
+class TarefaSchema(BaseModel):
+    titulo: str = Field(description="Título curto do exercício")
+    conteudo_exercicio: str = Field(description="O que o aluno deve fazer detalhadamente")
+    tempo_estimado: int = Field(description="Tempo estimado em minutos")
+    pontos_dificuldade: int = Field(description="Um número inteiro de 1 a 5 representando a dificuldade (1 = muito fácil, 5 = muito difícil)")
+    pergunta: str = Field(description="Uma pergunta de múltipla escolha para validar se o aluno entendeu a tarefa")
+    opcoes: list[str] = Field(description="Uma lista contendo exatamente 4 opções curtas de resposta para a pergunta")
+    resposta_correta: str = Field(description="O texto exato da opção correta (deve ser idêntico a um dos itens da lista de opções)")
+
+class ModuloSchema(BaseModel):
+    nome_modulo: str = Field(description="O nome do módulo. Ex: Módulo 1 - Fundamentos")
+    tarefas: list[TarefaSchema] = Field(description="Lista de tarefas (exercícios) deste módulo")
+
+class RoadmapSchema(BaseModel):
+    modulos: list[ModuloSchema] = Field(description="Lista de módulos do roteiro")
 class SocraticMentorService:
     """
     Serviço dedicado à comunicação com a API do Google Gemini.
@@ -9,9 +25,10 @@ class SocraticMentorService:
     
     SYSTEM_INSTRUCTION = (
         "Você é um Mentor educacional especializado em planejar trilhas de aprendizado (Roadmaps). "
-        "Sua missão é gerar um plano de estudos detalhado, claro e estruturado, entregando a resposta "
-        "pronta para o usuário em Markdown. NÃO faça perguntas de volta e NÃO aja de forma socrática. "
-        "Apenas entregue o roteiro definitivo que o aluno solicitou."
+        "Sua missão é gerar um plano de estudos detalhado, claro e estruturado, dividido em módulos lógicos, "
+        "com cada módulo contendo exercícios práticos. NÃO aja de forma socrática e não faça perguntas. "
+        "Apenas construa o roteiro rigorosamente dentro da estrutura de dados solicitada. O tempo_estimado da tarefa deve caber no tempo total que o aluno solicitou. "
+        "Para CADA tarefa, crie uma 'pergunta' de múltipla escolha para testar o conhecimento do aluno sobre aquela tarefa, forneça 4 'opcoes' curtas e a 'resposta_correta' exata."
     )
     
     def __init__(self, model_name='gemini-2.5-flash'):
@@ -39,7 +56,10 @@ class SocraticMentorService:
                 model=self.model_name,
                 contents=user_prompt,
                 config=genai.types.GenerateContentConfig(
-                    system_instruction=self.SYSTEM_INSTRUCTION
+                    system_instruction=self.SYSTEM_INSTRUCTION,
+                    response_mime_type="application/json",
+                    response_schema=RoadmapSchema,
+                    temperature=0.7
                 )
             )
             # Retorna apenas o texto puro (conteúdo da resposta)

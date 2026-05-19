@@ -21,8 +21,11 @@ from . import views
 urlpatterns = [
     path('', views.landing_page, name='landing_page'),
     path('cadastro/', views.cadastro_page, name='cadastro_page'),
+    path('sobre/', views.sobre_page, name='sobre_page'),
     path('login/', views.login_page, name='login_page'),
     path('perfil/', views.perfil_page, name='perfil_page'),
+    path('tarefas/', views.tarefas_page, name='tarefas_page'),
+    path('trilhas/', views.roadmaps_page, name='roadmaps_page'),
     path('gerador-roadmap/', views.roadmap_page, name='roadmap_page'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
