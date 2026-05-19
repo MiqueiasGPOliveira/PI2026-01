@@ -71,8 +71,14 @@
         scrollbar-color: #334155 transparent;
     }
 
-    .form-area::-webkit-scrollbar { width: 6px; }
-    .form-area::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    .form-area::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .form-area::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 10px;
+    }
 
     .intro-text {
         color: #94a3b8;
@@ -93,7 +99,8 @@
         color: #cbd5e1;
     }
 
-    .form-group input, .form-group select {
+    .form-group input,
+    .form-group select {
         width: 100%;
         padding: 12px;
         background: rgba(15, 23, 42, 0.6);
@@ -105,7 +112,8 @@
         box-sizing: border-box;
     }
 
-    .form-group input:focus, .form-group select:focus {
+    .form-group input:focus,
+    .form-group select:focus {
         outline: none;
         border-color: #38bdf8;
         box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
@@ -151,7 +159,9 @@
 
 
 
-    ::placeholder { color: #475569; }
+    ::placeholder {
+        color: #475569;
+    }
 </style>
 {% endblock %}
 
@@ -160,25 +170,28 @@
     <div class="container">
         <div class="header">
             <h2>Gerador de Roadmap Educacional</h2>
-            <a href="{% url 'perfil_page' %}" class="btn-back">← Voltar</a>
+            <a href="{% url 'roadmaps_page' %}" class="btn-back">← Voltar</a>
         </div>
 
         <div class="form-area" id="formArea">
             <p style="color: #22c55e; margin-bottom: 20px;">
-                Preencha os detalhes abaixo e nossa Inteligência Artificial criará uma trilha de estudos personalizada unindo suas informações do perfil com seu objetivo atual.
+                Preencha os detalhes abaixo e nossa Inteligência Artificial criará uma trilha de estudos personalizada
+                unindo suas informações do perfil com seu objetivo atual.
             </p>
 
             <form id="roadmapForm">
                 {% csrf_token %}
-                
+
                 <div class="form-group">
                     <label for="assunto">O que você quer aprender? (Assunto)</label>
-                    <input type="text" id="assunto" required placeholder="Ex: Programação Python, Filosofia, Matemática...">
+                    <input type="text" id="assunto" required
+                        placeholder="Ex: Programação Python, Filosofia, Matemática...">
                 </div>
 
                 <div class="form-group">
                     <label for="objetivo">Qual seu objetivo com isso?</label>
-                    <input type="text" id="objetivo" required placeholder="Ex: Conseguir o primeiro emprego, Passar no vestibular...">
+                    <input type="text" id="objetivo" required
+                        placeholder="Ex: Conseguir o primeiro emprego, Passar no vestibular...">
                 </div>
 
                 <div class="form-group">
@@ -206,7 +219,7 @@
                         <option value="3 horas">3 horas</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="periodo_estudo">Em qual período do dia você irá estudar?</label>
                     <select id="periodo_estudo" required>
@@ -304,7 +317,7 @@
                 if (response.status === 200) {
                     await showModalAlert('Trilha gerada e salva com sucesso!', 'Sucesso');
                     window.location.href = '/trilhas/';
-                    
+
                 } else if (response.status === 401 || response.status === 403) {
                     await showModalAlert('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
                     window.location.href = '/login/';
