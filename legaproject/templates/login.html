@@ -4,13 +4,18 @@
 
 {% block extra_css %}
 <style>
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
     .auth-wrapper {
         display: flex;
         justify-content: center;
         align-items: center;
         flex: 1;
         padding: 40px 20px;
-        min-height: calc(100vh - 180px);
+        min-height: calc(100vh - 80px);
+        width: 100%;
     }
 
     .container {
@@ -31,6 +36,7 @@
         color: #38bdf8; 
         font-size: 2rem;
         letter-spacing: -0.025em;
+        margin-top: 0;
     }
 
     .form-group {
@@ -53,7 +59,6 @@
         color: #fff;
         font-size: 1rem;
         transition: all 0.3s ease;
-        box-sizing: border-box;
     }
 
     .form-group input:focus {
@@ -119,6 +124,39 @@
 
     ::placeholder {
         color: #475569;
+    }
+
+    /* --- AJUSTES EXCLUSIVOS PARA MOBILE (Telas de 360px a 480px) --- */
+    @media (max-width: 480px) {
+        .auth-wrapper {
+            padding: 100px 15px 40px 15px; /* Evita que o topo do formulário suma sob o menu */
+            align-items: flex-start; /* Melhor posicionamento em telas muito baixinhas */
+            min-height: auto;
+        }
+
+        .container {
+            padding: 24px 20px;
+            border-radius: 12px;
+        }
+
+        h2 {
+            font-size: 1.65rem;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group input {
+            padding: 11px 14px;
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            padding: 11px;
+            font-size: 0.95rem;
+        }
     }
 </style>
 {% endblock %}
